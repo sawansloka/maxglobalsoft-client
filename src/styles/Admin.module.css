@@ -1,0 +1,61 @@
+/* centered box */
+.loginContainer {
+    max-width: 360px;
+    margin: 80px auto;
+    padding: 32px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* headings */
+  .loginTitle {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 1.75rem;
+    color: #333;
+  }
+  
+  /* error banner */
+  .errorBox {
+    background: #ffe5e5;
+    color: #a00;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+  
+  /* form fields */
+  .formGroup {
+    margin-bottom: 16px;
+  }
+  .formGroup label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .formControl {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  
+  /* login button */
+  .btnLogin {
+    width: 100%;
+    padding: 12px;
+    background: #1e90ff;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .btnLogin:disabled {
+    background: #a0cfff;
+    cursor: not-allowed;
+  }
+  
