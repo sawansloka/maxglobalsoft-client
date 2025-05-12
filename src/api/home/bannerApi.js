@@ -5,8 +5,11 @@ const withAuth = (token) => ({
     headers: { Authorization: `Bearer ${token}` }
 });
 
-export const fetchBanners = (token) =>
-    axios.get(`${base}/admin/v1/home/banner`, withAuth(token));
+export const fetchBanners = (token, params = {}) =>
+    axios.get(`${base}/admin/v1/home/banner`, {
+        ...withAuth(token),
+        params
+    });
 
 export const fetchBannerById = (id, token) =>
     axios.get(`${base}/admin/v1/home/banner/${id}`, withAuth(token));

@@ -3,8 +3,9 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import Login from './pages/Login';
-import BannerList from './pages/BannerList';
-import BannerForm from './pages/BannerForm';
+import BannerList from './pages/home/BannerList';
+import BannerForm from './pages/home/BannerForm';
+import CompanyValueList from './pages/home/CompanyValueList';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             }
           >
             <Route path="banners" element={<BannerList />} />
+            <Route path="company-values" element={<CompanyValueList />} />
             <Route path="banners/new" element={<BannerForm />} />
             <Route path="banners/:id" element={<BannerForm />} />
             {/* add other “manage” routes here */}

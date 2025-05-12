@@ -1,11 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
-import {
-    createBanner,
-    fetchBannerById,
-    updateBanner
-} from '../api/bannerApi';
-import { AuthContext } from '../context/AuthContext';
+import { createBanner, fetchBannerById, updateBanner } from '../../api/home/bannerApi';
+import { AuthContext } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
+import styles from '../../styles/home/BannerList.module.css';
 
 export default function BannerForm() {
     const { id } = useParams();
@@ -49,6 +46,10 @@ export default function BannerForm() {
             await createBanner(form, token);
         }
         nav('/banners');
+    };
+
+    const handleCancel = () => {
+        nav('/banners'); // Navigate back to the banner list without saving
     };
 
     return (
@@ -99,9 +100,18 @@ export default function BannerForm() {
                     />
                 </div>
 
-                <button className="btn btn-success">
-                    {isEdit ? 'Update' : 'Create'}
-                </button>
+                <div className="d-flex gap-2 mt-3">
+                    <button className={styles.createButton}>
+                        {isEdit ? 'Update' : 'Create'}
+                    </button>
+                    <button
+                        type="button"
+                        className={styles.cancelButton}
+                        onClick={handleCancel}
+                    >
+                        Cancel
+                    </button>
+                </div>
             </form>
         </div>
     );
