@@ -5,12 +5,12 @@ import styles from '../styles/Footer.module.css';
 import profileImg from '../assets/anime3.jpg';
 import { FaSignOutAlt } from 'react-icons/fa';
 
-const Footer = () => {
+const Footer = ({ collapsed }) => {
     const { logout } = useContext(AuthContext);
     const [menuOpen, setMenuOpen] = useState(false);
 
     const toggleMenu = () => {
-        setMenuOpen(prevState => !prevState); // Toggle dropdown visibility
+        setMenuOpen(prevState => !prevState);
     };
 
     return (
@@ -20,7 +20,7 @@ const Footer = () => {
                 onClick={toggleMenu}
             >
                 <img src={profileImg} alt="Profile" className={styles.profileImage} />
-                <span className={styles.profileText}>Admin</span>
+                <span className={`${styles.profileText} ${collapsed ? styles.hideText : ''}`}>Admin</span>
             </div>
             {menuOpen && (
                 <div className={styles.dropdown}>

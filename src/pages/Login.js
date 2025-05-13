@@ -1,18 +1,18 @@
 import { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import styles from '../styles/Admin.module.css';
+import styles from '../styles/Login.module.css';
 
 export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const { login, loading } = useContext(AuthContext);
-    const [error, setError] = useState();
+    const [error, setError] = useState(null);
     const nav = useNavigate();
 
     const submit = async (e) => {
         e.preventDefault();
-        setError(undefined);
+        setError(null);
         try {
             await login(username, password);
             nav('/banners');
@@ -22,31 +22,36 @@ export default function Login() {
     };
 
     return (
-        <div className={styles.loginContainer}>
-            <h2 className={styles.loginTitle}>Admin Login</h2>
-            {error && <div className={styles.errorBox}>{error}</div>}
-            <form onSubmit={submit}>
-                <div className={styles.formGroup}>
-                    <label>Username</label>
+        <div className={styles.loginWrapper}>
+            <form onSubmit={submit} className={styles.loginBox}>
+                <h2 className={styles.loginTitle}>Admin Login</h2>
+                {error && <div className={styles.errorBox}>{error}</div>}
+                <div className={styles.inputGroup}>
+                    <label htmlFor="username">Username</label>
                     <input
-                        className={styles.formControl}
+                        id="username"
+                        type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
+                        className={styles.input}
+                        placeholder="Enter your username"
                     />
                 </div>
-                <div className={styles.formGroup}>
-                    <label>Password</label>
+                <div className={styles.inputGroup}>
+                    <label htmlFor="password">Password</label>
                     <input
+                        id="password"
                         type="password"
-                        className={styles.formControl}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        className={styles.input}
+                        placeholder="Enter your password"
                     />
                 </div>
-                <button type="submit" disabled={loading} className={styles.btnLogin}>
-                    {loading ? 'Logging in…' : 'Login'}
+                <button type="submit" disabled={loading} className={styles.loginButton}>
+                    {loading ? 'Logging in...' : 'Login'}
                 </button>
             </form>
         </div>

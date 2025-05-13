@@ -12,6 +12,22 @@ export function AuthProvider({ children }) {
         axios.defaults.headers.common.Authorization = token
             ? `Bearer ${token}`
             : '';
+
+        const interceptor = axios.interceptors.response.use(
+            response => response,
+            error => {
+                if (error.response && error.response.status === 401) {
+                    console.error("Unauthorized: Please authorize as an admin!");
+                    logout();
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        return () => {
+            axios.interceptors.response.eject(interceptor);
+        };
+
     }, [token]);
 
     const login = async (username, password) => {
@@ -21,15 +37,18 @@ export function AuthProvider({ children }) {
             const t = res.data.token;
             localStorage.setItem('adminToken', t);
             setToken(t);
+            return res.data;
         } finally {
             setLoading(false);
         }
     };
 
     const logout = async () => {
-        await apiLogout(token);
+        // No need to call apiLogout on 401, as the token is already invalid
+        // await apiLogout(token); // This line can be removed or handled carefully
         localStorage.removeItem('adminToken');
         setToken(null);
+        // The ProtectedRoute will handle the redirect to login when token is null
     };
 
     return (

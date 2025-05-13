@@ -111,9 +111,11 @@ export default function BannerList() {
                                                     <div
                                                         className={styles.menuItem}
                                                         onClick={async () => {
-                                                            await deleteBanner(b._id, token);
-                                                            setBanners(bs => bs.filter(x => x._id !== b._id));
-                                                            setMenuOpen(null);
+                                                            if (window.confirm("Are you sure you want to delete this banner?")) {
+                                                                await deleteBanner(b._id, token);
+                                                                setBanners(bs => bs.filter(x => x._id !== b._id));
+                                                                setMenuOpen(null);
+                                                            }
                                                         }}
                                                     >
                                                         <FaTrash style={{ color: 'red', marginRight: '8px' }} /> <span className={styles.boldText}>Remove</span>

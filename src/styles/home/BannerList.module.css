@@ -106,7 +106,12 @@
     padding: 10px;
     cursor: pointer;
     color: #2d3748;
+    display: flex;        
+    align-items: center;   
+    white-space: nowrap;   
+    text-decoration: none;
   }
+  
   
   .menuItem:hover {
     background-color: #f7fafc;
@@ -203,11 +208,10 @@
     font-weight: bold;
     color: #52555a;
     text-decoration: none;
-}
-
-.menuItem{
-  text-decoration: none;
-}
+    white-space: nowrap; /* Prevents line break */
+    display: inline-flex; /* Ensures icon and text stay aligned */
+    align-items: center;
+  }
 
 .createButton {
     background-color: #0e8757;
