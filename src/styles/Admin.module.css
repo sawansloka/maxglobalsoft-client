@@ -1,48 +1,115 @@
-/* Sidebar */
+/* Collapsible Sidebar Styles */
+.container {
+  display: flex;
+  height: 100vh;
+  background-color: #f0f0f0;
+  transition: all 0.3s ease;
+}
+
 .sidebar {
-  width: 240px;
-  background: #2d3748; /* Darker, more modern background */
-  color: #f7fafc; /* Off-white, slightly softer text */
+  width: 300px;
+  background: #2d3748;
+  color: #f7fafc;
   display: flex;
   flex-direction: column;
-  padding: 20px 16px; /* Slightly reduced vertical padding */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Refined shadow */
-  border-right: 1px solid #4a5568; /* Subtle border */
+  padding: 20px 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  border-right: 1px solid #4a5568;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.sidebarCollapsed {
+  width: 80px;
+  padding: 20px 8px;
+}
+
+.toggleButton {
+  position: absolute;
+  right: 25px;
+  background-color: #2d3748;
+  border: 1px solid #2d3748;
+  color: #c8cace;
+  transition: background 0.3s ease;
+  z-index: 100;
+}
+
+.toggleButton:hover {
+  background-color: #4a5568;
 }
 
 .sidebarHeading {
-  font-size: 0.9rem; /* Slightly larger heading */
+  font-size: 0.9rem;
+  font-weight: bold;
   text-transform: uppercase;
-  margin-bottom: 20px; /* Increased margin */
-  letter-spacing: 0.05em; /* Subtle letter spacing */
-  color: #a0aec0; /* Muted heading color */
+  margin-bottom: 20px;
+  letter-spacing: 0.05em;
+  color: #c8cace;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid #718096;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.3s ease;
 }
+
+.sidebarCollapsed .boldText { 
+  display: none;
+}
+
+.sidebarCollapsed .sidebarLabel {
+  display: none;
+}
+
+.sidebarCollapsed .navLink span { 
+  display: none;
+}
+
+.sidebarCollapsed .sidebarHeading {
+  justify-content: center;
+  gap: 0.5px; 
+  transform: translateY(120px);
+  margin-left: 25%;
+}
+
+.sidebarCollapsed .sidebarIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebarCollapsed .expandIcon {
+  /* transform: translateY(120px); */
+}
+
 
 .nav {
   margin-bottom: 20px;
 }
 
+.sidebarCollapsed .nav{
+  
+}
+
 .navLink {
-  color: #e2e8f0; /* Lighter text for inactive links */
-  padding: 10px 16px; /* Slightly increased horizontal padding */
+  color: #e2e8f0;
+  padding: 10px 16px;
   text-decoration: none;
-  font-size: 0.9rem; /* Slightly smaller font size */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
-  border-radius: 0.375rem; /* Rounded corners using Tailwind's scale */
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: 0.375rem;
   display: block;
 }
 
 .navLink:hover,
 .navLinkActive {
-  background-color: #4a5568; /* Darker hover/active background */
-  color: #fff; /* White text on hover/active */
-  font-weight: 500; /* Make active link bold */
+  background-color: #4a5568;
+  color: #fff;
+  font-weight: 500;
 }
 
 .navLink:hover {
-    color: #fff;
+  color: #fff;
 }
 
 .navSection {
@@ -51,129 +118,107 @@
   border-top: 1px solid #718096;
 }
 
-
-/* Layout */
-.container {
-  display: flex;
-  height: 100vh;
-  background-color: #f0f0f0; /* Slightly off-white background */
-}
-
 .content {
   flex: 1;
-  background: #ffffff; /* White background for main content */
-  padding: 2rem; /* Use rem for consistent spacing */
+  background: #ffffff;
+  padding: 2rem;
   overflow-y: auto;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   margin: 1rem;
+  transition: margin 0.3s ease;
 }
 
-/* centered box */
-.loginContainer {
-  max-width: 360px;
-  margin: 4rem auto;
-  padding: 2rem;
-  background: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* headings */
-.loginTitle {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  font-size: 2rem;
-  color: #2d3748;
-  font-weight: 600;
-}
-
-/* error banner */
-.errorBox {
-  background: #f56565;
-  color: #fff;
-  padding: 1rem;
-  border-radius: 0.375rem;
-  margin-bottom: 1rem;
-  border-left: 4px solid #b22222;
-}
-
-/* form fields */
-.formGroup {
-  margin-bottom: 1.5rem;
-}
-
-.formGroup label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #4a5568;
-  font-size: 0.875rem;
-}
-
-.formControl {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #cbd5e0;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  color: #2d3748;
-  transition: border-color 0.2s ease;
-}
-
-.formControl:focus {
-    outline: none;
-    border-color: #4299e1;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+.expandArrow {
+  transform: translateY(-15px);
 }
 
 
-/* login button */
-.btnLogin {
-  width: 100%;
-  padding: 0.75rem;
-  background: #4299e1;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
 
-.btnLogin:hover {
-  background-color: #3182ce;
-}
-
-.btnLogin:disabled {
-  background: #a0aec0;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* New styles for expand/collapse icons */
-.expandIcon {
-  margin-left: 8px; /* Space between title and icon */
-  color: #a0aec0; /* Icon color */
-}
 .groupTitle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
 }
 
-.boldText{
+.boldText {
   font-weight: bold;
   color: #c8cace;
   padding-bottom: 70px;
   margin-top: 30px;
+  transition: opacity 0.3s ease;
 }
 
 .footerWrapper {
-  position: absolute;  
-  bottom: 10px;  
+  position: absolute;
+  bottom: 10px;
   left: 0;
   display: flex;
   justify-content: center;
+  width: 100%;
+}
+
+.dropdownNav {
+  background-color: #3a4758;
+  border-left: 3px solid #4299e1;
+  padding-left: 12px;
+  border-radius: 0.375rem;
+}
+
+.sidebarCollapsed .dropdownNav{
+  position: relative;
+}
+
+.modal {
+  position: fixed;
+  background: #2d3748;
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 2000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 180px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modalTitle {
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #c8cace;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #718096;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.3s ease;
+}
+
+/* Modal dropdown style */
+.modal .dropdownNav {
+  background-color: #3a4758; /* Same as sidebar */
+  border-left: 3px solid #4299e1; /* Same border as sidebar */
+  padding-left: 12px; /* Same padding as sidebar */
+  border-radius: 0.375rem; /* Same border radius */
+  margin-top: 10px;
+}
+
+/* Apply styling for the links inside modal dropdown */
+.modal .dropdownNav .navLink {
+  color: #fff;
+  padding: 8px 12px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+/* Apply active and hover effects */
+.modal .dropdownNav .navLink:hover {
+  background-color: #555;
+}
+
+.modal .dropdownNav .navLinkActive {
+  background-color: #007bff;
+  color: white;
 }
