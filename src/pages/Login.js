@@ -15,7 +15,7 @@ export default function Login() {
         setError(null);
         try {
             await login(username, password);
-            nav('/banners');
+            nav('/admin/home/banners');
         } catch (err) {
             setError(err.response?.data?.message || err.message);
         }

@@ -1,25 +1,29 @@
-// BannerList.js
+// ServiceList.js
 
 import { useState, useEffect, useContext } from 'react';
-import styles from '../../styles/home/BannerList.module.css';
-import { fetchBanners, deleteBanner, fetchBannerById } from '../../api/home/bannerApi';
+import styles from '../../styles/home/BannerList.module.css'; // Reusing styles
+import {
+    fetchServices,
+    deleteService,
+    fetchServiceById,
+} from '../../api/home/serviceApi';
 import { AuthContext } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { IoCreate } from "react-icons/io5";
 
-export default function BannerList() {
+export default function ServiceList() {
     const { token } = useContext(AuthContext);
-    const [banners, setBanners] = useState([]);
+    const [services, setServices] = useState([]);
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [menuOpen, setMenuOpen] = useState(null);
-    const [selectedBanner, setSelectedBanner] = useState(null);
+    const [selectedService, setSelectedService] = useState(null);
     const [deleteConfirmation, setDeleteConfirmation] = useState({
         open: false,
-        bannerId: null,
+        serviceId: null,
     });
     const [errorModal, setErrorModal] = useState({ open: false, message: '' });
     const perPage = 10;
@@ -36,17 +40,17 @@ export default function BannerList() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetchBanners(token, { page, limit: perPage, search: debouncedSearch });
-                setBanners(res.data.data);
-                setTotalPages(res.data.totalPages || 1);
-                window.scrollTo({ top: 0, behavior: 'smooth' }); // scroll to top on page change
+                const res = await fetchServices(token, { page, limit: perPage, search: debouncedSearch });
+                setServices(res.data.data);
+                setTotalPages(Math.ceil(res.data.total / perPage) || 1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (error) {
-                console.error('Failed to fetch banners:', error);
+                console.error('Failed to fetch services:', error);
                 if (error.response && error.response.status === 401) {
                     console.log("Unauthorized access. Redirecting to login.");
                     navigate('/admin/login');
                 } else {
-                    setErrorModal({ open: true, message: error.message || 'Failed to fetch banners.' });
+                    setErrorModal({ open: true, message: error.message || 'Failed to fetch services.' });
                 }
             }
         };
@@ -57,43 +61,43 @@ export default function BannerList() {
 
     const handleViewDetails = async (id) => {
         try {
-            const res = await fetchBannerById(id, token);
-            setSelectedBanner(res.data.data);
+            const res = await fetchServiceById(id, token);
+            setSelectedService(res.data.data);
         } catch (error) {
-            console.error("Failed to fetch banner details:", error);
+            console.error("Failed to fetch service details:", error);
             if (error.response && error.response.status === 401) {
                 console.log("Unauthorized access. Redirecting to login.");
                 navigate('/admin/login');
             } else {
-                setErrorModal({ open: true, message: error.message || 'Failed to fetch banner details.' });
+                setErrorModal({ open: true, message: error.message || 'Failed to fetch service details.' });
             }
         }
         setMenuOpen(null);
     };
 
-    const closeModal = () => setSelectedBanner(null);
+    const closeModal = () => setSelectedService(null);
 
     const openDeleteConfirmation = (id) => {
-        setDeleteConfirmation({ open: true, bannerId: id });
+        setDeleteConfirmation({ open: true, serviceId: id });
         setMenuOpen(null);
     };
 
     const closeDeleteConfirmation = () => {
-        setDeleteConfirmation({ open: false, bannerId: null });
+        setDeleteConfirmation({ open: false, serviceId: null });
     };
 
     const handleDeleteConfirm = async () => {
         try {
-            await deleteBanner(deleteConfirmation.bannerId, token);
-            setBanners(prev => prev.filter(b => b._id !== deleteConfirmation.bannerId));
+            await deleteService(deleteConfirmation.serviceId, token);
+            setServices(prev => prev.filter(s => s._id !== deleteConfirmation.serviceId));
             closeDeleteConfirmation();
         } catch (err) {
-            console.error("Failed to delete banner:", err);
+            console.error("Failed to delete service:", err);
             if (err.response && err.response.status === 401) {
                 console.log("Unauthorized access. Redirecting to login.");
                 navigate('/admin/login');
             } else {
-                setErrorModal({ open: true, message: err.message || 'Failed to delete banner.' });
+                setErrorModal({ open: true, message: err.message || 'Failed to delete service.' });
             }
         }
     };
@@ -105,16 +109,16 @@ export default function BannerList() {
     return (
         <>
             <div className={styles.header}>
-                <h1 className={styles.title}>List Banner</h1>
+                <h1 className={styles.title}>List Services</h1>
                 <input
                     className={styles.searchInput}
-                    placeholder="Search banners..."
+                    placeholder="Search services..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                 />
-                <Link to="/admin/home/banners/new">
+                <Link to="/admin/home/services/new">
                     <button className={styles.newButton}>
-                        <span className={styles.boldText3}><IoCreate /> New Banner</span>
+                        <span className={styles.boldText3}><IoCreate /> New Service</span>
                     </button>
                 </Link>
             </div>
@@ -132,41 +136,41 @@ export default function BannerList() {
                             </tr>
                         </thead>
                         <tbody>
-                            {banners.map(b => (
-                                <tr key={b._id}>
-                                    <td>{b.displayOrder}</td>
-                                    <td>{b.bannerTitle}</td>
+                            {services.map(service => (
+                                <tr key={service._id}>
+                                    <td>{service.displayOrder}</td>
+                                    <td>{service.serviceTitle}</td>
                                     <td>
-                                        {b.image ? (
+                                        {service.image ? (
                                             <img
-                                                src={b.image}
-                                                alt={b.bannerTitle}
+                                                src={service.image}
+                                                alt={service.serviceTitle}
                                                 style={{ maxWidth: '100px', height: 'auto' }}
                                             />
                                         ) : 'No Image'}
                                     </td>
-                                    <td>{b.status}</td>
+                                    <td>{service.status}</td>
                                     <td>
                                         <div className={styles.dropdown}>
-                                            <button className={styles.actionBtn} onClick={() => toggleMenu(b._id)}>
+                                            <button className={styles.actionBtn} onClick={() => toggleMenu(service._id)}>
                                                 <span className={styles.boldText2}>⋮</span>
                                             </button>
-                                            {menuOpen === b._id && (
+                                            {menuOpen === service._id && (
                                                 <div className={styles.menu}>
                                                     <div
                                                         className={styles.menuItem}
-                                                        onClick={() => handleViewDetails(b._id)}
+                                                        onClick={() => handleViewDetails(service._id)}
                                                     >
                                                         <FaEye style={{ marginRight: '8px' }} />
                                                         <span className={styles.boldText}>View Details</span>
                                                     </div>
-                                                    <Link to={`/admin/home/banners/${b._id}`} className={styles.menuItem}>
+                                                    <Link to={`/admin/home/services/${service._id}`} className={styles.menuItem}>
                                                         <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
                                                         <span className={styles.boldText}>Edit</span>
                                                     </Link>
                                                     <div
                                                         className={styles.menuItem}
-                                                        onClick={() => openDeleteConfirmation(b._id)}
+                                                        onClick={() => openDeleteConfirmation(service._id)}
                                                     >
                                                         <FaTrash style={{ color: 'red', marginRight: '8px' }} />
                                                         <span className={styles.boldText}>Remove</span>
@@ -199,17 +203,19 @@ export default function BannerList() {
                 </ul>
             </div>
 
-            {selectedBanner && (
+            {selectedService && (
                 <div className={styles.modalOverlay} onClick={closeModal}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
                         <button className={styles.closeButton} onClick={closeModal}>✕</button>
-                        <h2>{selectedBanner.bannerTitle}</h2>
-                        <p><strong>URL:</strong> {selectedBanner.url}</p>
-                        <p><strong>Order:</strong> {selectedBanner.displayOrder}</p>
-                        <p><strong>Status:</strong> {selectedBanner.status}</p>
-                        <p><strong>Short Description:</strong> {selectedBanner.shortDescription}</p>
-                        {selectedBanner.image && (
-                            <img src={selectedBanner.image} alt="Banner" className={styles.modalImage} />
+                        <h2>{selectedService.serviceTitle}</h2>
+                        <p><strong>URL:</strong> {selectedService.url}</p>
+                        <p><strong>Order:</strong> {selectedService.displayOrder}</p>
+                        <p><strong>Status:</strong> {selectedService.status}</p>
+                        <p><strong>Display on Homepage:</strong> {selectedService.isDisplay ? 'Yes' : 'No'}</p>
+                        <p><strong>Short Description:</strong> {selectedService.shortDescription}</p>
+                        <p><strong>Description:</strong> {selectedService.description}</p>
+                        {selectedService.image && (
+                            <img src={selectedService.image} alt={selectedService.serviceTitle} className={styles.modalImage} />
                         )}
                     </div>
                 </div>
@@ -220,7 +226,7 @@ export default function BannerList() {
                 <div className={styles.modalOverlay} onClick={closeDeleteConfirmation}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
                         <h2 style={{ marginBottom: '15px' }}>Confirm Delete</h2>
-                        <p style={{ marginBottom: '20px' }}>Are you sure you want to delete this banner?</p>
+                        <p style={{ marginBottom: '20px' }}>Are you sure you want to delete this service?</p>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                             <button className={styles.cancelButton} onClick={closeDeleteConfirmation}>Cancel</button>
                             <button className={styles.createButton} onClick={handleDeleteConfirm}>Delete</button>

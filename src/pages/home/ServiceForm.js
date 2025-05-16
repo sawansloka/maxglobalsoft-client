@@ -1,20 +1,28 @@
+// ServiceForm.js
+
 import { useState, useEffect, useContext } from 'react';
-import { createBanner, fetchBannerById, updateBanner } from '../../api/home/bannerApi';
+import {
+    createService,
+    fetchServiceById,
+    updateService,
+} from '../../api/home/serviceApi';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import styles from '../../styles/home/BannerList.module.css';
+import styles from '../../styles/home/BannerList.module.css'; // Reusing styles
 import { ThreeDots } from 'react-loader-spinner';
 
-export default function BannerForm() {
+export default function ServiceForm() {
     const { id } = useParams();
     const isEdit = Boolean(id);
     const [form, setForm] = useState({
-        bannerTitle: '',
+        serviceTitle: '',
         url: '',
         shortDescription: '',
+        description: '',
         displayOrder: 1,
         status: 'active',
-        image: ''
+        image: '',
+        isDisplay: false,
     });
     const { token } = useContext(AuthContext);
     const nav = useNavigate();
@@ -26,11 +34,11 @@ export default function BannerForm() {
             setLoading(true);
             (async () => {
                 try {
-                    const res = await fetchBannerById(id, token);
+                    const res = await fetchServiceById(id, token);
                     setForm(res.data.data);
                 } catch (error) {
-                    console.error("Error fetching banner for edit:", error);
-                    setErrorModal({ open: true, message: error.response?.data?.error || 'Failed to fetch banner details for editing.' });
+                    console.error("Error fetching service for edit:", error);
+                    setErrorModal({ open: true, message: error.response?.data?.error || 'Failed to fetch service details for editing.' });
                 } finally {
                     setLoading(false);
                 }
@@ -39,11 +47,13 @@ export default function BannerForm() {
     }, [id, isEdit, token]);
 
     const handleChange = e => {
-        const { name, value, files } = e.target;
+        const { name, value, type, checked, files } = e.target;
         if (name === 'image' && files[0]) {
             const reader = new FileReader();
             reader.onload = () => setForm(f => ({ ...f, image: reader.result }));
             reader.readAsDataURL(files[0]);
+        } else if (type === 'checkbox') {
+            setForm(f => ({ ...f, [name]: checked }));
         } else {
             setForm(f => ({ ...f, [name]: value }));
         }
@@ -54,17 +64,17 @@ export default function BannerForm() {
         setLoading(true);
         try {
             if (isEdit) {
-                await updateBanner(id, form, token);
+                await updateService(id, form, token);
             } else {
-                await createBanner(form, token);
+                await createService(form, token);
             }
-            nav('/admin/home/banners');
+            nav('/admin/home/services');
         } catch (error) {
-            console.error("Error submitting banner:", error);
+            console.error("Error submitting service:", error);
             if (error.response && error.response.status === 400) {
                 setErrorModal({ open: true, message: error.response.data.error });
             } else {
-                setErrorModal({ open: true, message: error.message || (isEdit ? 'Failed to update banner.' : 'Failed to create banner.') });
+                setErrorModal({ open: true, message: error.message || (isEdit ? 'Failed to update service.' : 'Failed to create service.') });
             }
         } finally {
             setLoading(false);
@@ -72,7 +82,7 @@ export default function BannerForm() {
     };
 
     const handleCancel = () => {
-        nav('/admin/home/banners');
+        nav('/admin/home/services');
     };
 
     const closeErrorModal = () => {
@@ -81,27 +91,53 @@ export default function BannerForm() {
 
     return (
         <div className="container mt-4">
-            <h2>{isEdit ? 'Edit' : 'New'} Banner</h2>
+            <h2>{isEdit ? 'Edit' : 'New'} Service</h2>
             <form onSubmit={handleSubmit}>
                 {[
-                    { label: 'Title', name: 'bannerTitle' },
+                    { label: 'Title', name: 'serviceTitle' },
                     { label: 'URL', name: 'url' },
                     { label: 'Short Description', name: 'shortDescription' },
+                    { label: 'Description', name: 'description', type: 'textarea' },
                     { label: 'Display Order', name: 'displayOrder', type: 'number' },
                 ].map(({ label, name, type = 'text' }) => (
                     <div className="mb-3" key={name}>
                         <label>{label}</label>
-                        <input
-                            className="form-control"
-                            name={name}
-                            type={type}
-                            value={form[name]}
-                            onChange={handleChange}
-                            required={name === 'bannerTitle'}
-                            disabled={loading}
-                        />
+                        {type === 'textarea' ? (
+                            <textarea
+                                className="form-control"
+                                name={name}
+                                value={form[name]}
+                                onChange={handleChange}
+                                required={name === 'serviceTitle'}
+                                disabled={loading}
+                                style={{ height: '150px' }} // Added a default height
+                            />
+                        ) : (
+                            <input
+                                className="form-control"
+                                name={name}
+                                type={type}
+                                value={form[name]}
+                                onChange={handleChange}
+                                required={name === 'serviceTitle'}
+                                disabled={loading}
+                            />
+                        )}
                     </div>
                 ))}
+
+                <div className="mb-3">
+                    <label>Display on Homepage</label>
+                    <input
+                        type="checkbox"
+                        className="form-check-input"
+                        name="isDisplay"
+                        checked={form.isDisplay}
+                        onChange={handleChange}
+                        disabled={loading}
+                        style={{ marginLeft: '10px' }}
+                    />
+                </div>
 
                 <div className="mb-3">
                     <label>Status</label>
