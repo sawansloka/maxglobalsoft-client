@@ -1,18 +1,21 @@
 import { useState, useEffect, useContext } from 'react';
-import { createBanner, fetchBannerById, updateBanner } from '../../api/home/bannerApi';
+import { createClientSpeak, fetchClientSpeakById, updateClientSpeak } from '../../api/company/clientSpeakApi';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../styles/home/BannerList.module.css';
 import { ThreeDots } from 'react-loader-spinner';
 
-export default function BannerForm() {
+export default function ClientSpeakForm() {
     const { id } = useParams();
     const isEdit = Boolean(id);
     const [form, setForm] = useState({
-        bannerTitle: '',
-        url: '',
+        title: '',
+        name: '',
+        location: '',
+        youtubeLink: '',
+        date: new Date().toISOString().split('T')[0],
         shortDescription: '',
-        displayOrder: 1,
+        description: '',
         status: 'active',
         image: ''
     });
@@ -26,11 +29,11 @@ export default function BannerForm() {
             setLoading(true);
             (async () => {
                 try {
-                    const res = await fetchBannerById(id, token);
+                    const res = await fetchClientSpeakById(id, token);
                     setForm(res.data.data);
                 } catch (error) {
-                    console.error("Error fetching banner for edit:", error);
-                    setErrorModal({ open: true, message: error.response?.data?.error || 'Failed to fetch banner details for editing.' });
+                    console.error("Error fetching client speak for edit:", error);
+                    setErrorModal({ open: true, message: error.response?.data?.error || 'Failed to fetch client speak details for editing.' });
                 } finally {
                     setLoading(false);
                 }
@@ -54,17 +57,17 @@ export default function BannerForm() {
         setLoading(true);
         try {
             if (isEdit) {
-                await updateBanner(id, form, token);
+                await updateClientSpeak(id, form, token);
             } else {
-                await createBanner(form, token);
+                await createClientSpeak(form, token);
             }
-            nav('/admin/home/banners');
+            nav('/admin/company/clientspeak');
         } catch (error) {
-            console.error("Error submitting banner:", error);
+            console.error("Error submitting client speak:", error);
             if (error.response && error.response.status === 400) {
                 setErrorModal({ open: true, message: error.response.data.error });
             } else {
-                setErrorModal({ open: true, message: error.message || (isEdit ? 'Failed to update banner.' : 'Failed to create banner.') });
+                setErrorModal({ open: true, message: error.message || (isEdit ? 'Failed to update client speak.' : 'Failed to create client speak.') });
             }
         } finally {
             setLoading(false);
@@ -72,7 +75,7 @@ export default function BannerForm() {
     };
 
     const handleCancel = () => {
-        nav('/admin/home/banners');
+        nav('/admin/company/clientspeak');
     };
 
     const closeErrorModal = () => {
@@ -81,25 +84,39 @@ export default function BannerForm() {
 
     return (
         <div className="container mt-4">
-            <h2>{isEdit ? 'Edit' : 'New'} Banner</h2>
+            <h2>{isEdit ? 'Edit' : 'New'} Client Speak</h2>
             <form onSubmit={handleSubmit}>
                 {[
-                    { label: 'Title', name: 'bannerTitle' },
-                    { label: 'URL', name: 'url' },
-                    { label: 'Short Description', name: 'shortDescription' },
-                    { label: 'Display Order', name: 'displayOrder', type: 'number' },
+                    { label: 'Title', name: 'title' },
+                    { label: 'Name', name: 'name' },
+                    { label: 'Location', name: 'location' },
+                    { label: 'YouTube Link', name: 'youtubeLink' },
+                    { label: 'Date', name: 'date', type: 'date' },
+                    { label: 'Short Description', name: 'shortDescription', type: 'textarea' },
+                    { label: 'Description', name: 'description', type: 'textarea' },
                 ].map(({ label, name, type = 'text' }) => (
                     <div className="mb-3" key={name}>
                         <label>{label}</label>
-                        <input
-                            className="form-control"
-                            name={name}
-                            type={type}
-                            value={form[name]}
-                            onChange={handleChange}
-                            required={name === 'bannerTitle'}
-                            disabled={loading}
-                        />
+                        {type === 'textarea' ? (
+                            <textarea
+                                className="form-control"
+                                name={name}
+                                value={form[name]}
+                                onChange={handleChange}
+                                required={['title', 'name', 'location', 'date', 'shortDescription', 'description'].includes(name)}
+                                disabled={loading}
+                            />
+                        ) : (
+                            <input
+                                className="form-control"
+                                name={name}
+                                type={type}
+                                value={form[name]}
+                                onChange={handleChange}
+                                required={['title', 'name', 'location', 'date'].includes(name)}
+                                disabled={loading}
+                            />
+                        )}
                     </div>
                 ))}
 
