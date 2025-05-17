@@ -1,16 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
-import { createNewsEvent, fetchNewsEventById, updateNewsEvent } from '../../api/company/newsEventApi';
+import { createCareer, fetchCareerById, updateCareer } from '../../api/company/careerApi';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../styles/home/BannerList.module.css';
 import { ThreeDots } from 'react-loader-spinner';
 
-export default function NewsEventForm() {
+export default function CareerForm() {
     const { id } = useParams();
     const isEdit = Boolean(id);
     const [form, setForm] = useState({
-        title: '',
-        name: '',
+        jobTypes: '',
+        totalExp: '',
         location: '',
         date: new Date().toISOString().split('T')[0],
         shortDescription: '',
@@ -28,11 +28,11 @@ export default function NewsEventForm() {
             setLoading(true);
             (async () => {
                 try {
-                    const res = await fetchNewsEventById(id, token);
+                    const res = await fetchCareerById(id, token);
                     setForm(res.data.data);
                 } catch (error) {
-                    console.error("Error fetching news event for edit:", error);
-                    setErrorModal({ open: true, message: error.response?.data?.error || 'Failed to fetch news event details for editing.' });
+                    console.error("Error fetching career for edit:", error);
+                    setErrorModal({ open: true, message: error.response?.data?.error || 'Failed to fetch career details for editing.' });
                 } finally {
                     setLoading(false);
                 }
@@ -56,17 +56,17 @@ export default function NewsEventForm() {
         setLoading(true);
         try {
             if (isEdit) {
-                await updateNewsEvent(id, form, token);
+                await updateCareer(id, form, token);
             } else {
-                await createNewsEvent(form, token);
+                await createCareer(form, token);
             }
-            nav('/admin/company/event-news');
+            nav('/admin/company/career');
         } catch (error) {
-            console.error("Error submitting news event:", error);
+            console.error("Error submitting career:", error);
             if (error.response && error.response.status === 400) {
                 setErrorModal({ open: true, message: error.response.data.error });
             } else {
-                setErrorModal({ open: true, message: error.message || (isEdit ? 'Failed to update news event.' : 'Failed to create news event.') });
+                setErrorModal({ open: true, message: error.message || (isEdit ? 'Failed to update career.' : 'Failed to create career.') });
             }
         } finally {
             setLoading(false);
@@ -74,7 +74,7 @@ export default function NewsEventForm() {
     };
 
     const handleCancel = () => {
-        nav('/admin/company/event-news');
+        nav('/admin/company/career');
     };
 
     const closeErrorModal = () => {
@@ -83,11 +83,11 @@ export default function NewsEventForm() {
 
     return (
         <div className="container mt-4">
-            <h2>{isEdit ? 'Edit' : 'New'} News Event</h2>
+            <h2>{isEdit ? 'Edit' : 'New'} Career Opportunity</h2>
             <form onSubmit={handleSubmit}>
                 {[
-                    { label: 'Title', name: 'title' },
-                    { label: 'Name', name: 'name' },
+                    { label: 'Job Type', name: 'jobTypes' },
+                    { label: 'Total Experience', name: 'totalExp' },
                     { label: 'Location', name: 'location' },
                     { label: 'Date', name: 'date', type: 'date' },
                     { label: 'Short Description', name: 'shortDescription', type: 'textarea' },
@@ -101,7 +101,7 @@ export default function NewsEventForm() {
                                 name={name}
                                 value={form[name]}
                                 onChange={handleChange}
-                                required={['title', 'name', 'location', 'date', 'shortDescription', 'description'].includes(name)}
+                                required={['jobTypes', 'totalExp', 'location', 'date', 'shortDescription', 'description'].includes(name)}
                                 disabled={loading}
                             />
                         ) : (
@@ -111,7 +111,7 @@ export default function NewsEventForm() {
                                 type={type}
                                 value={form[name]}
                                 onChange={handleChange}
-                                required={['title', 'name', 'location', 'date'].includes(name)}
+                                required={['jobTypes', 'totalExp', 'location', 'date'].includes(name)}
                                 disabled={loading}
                             />
                         )}

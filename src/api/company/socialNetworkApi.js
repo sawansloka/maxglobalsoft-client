@@ -17,8 +17,8 @@ export const fetchSocialNetworkById = (id, token) =>
 export const createSocialNetwork = (data, token) =>
     axios.post(`${base}/admin/v1/company/social-network`, data, withAuth(token));
 
-export const updateSocialNetwork = (data, token) =>
-    axios.put(`${base}/admin/v1/company/social-network`, data, withAuth(token));
+export const updateSocialNetwork = (id, data, token) =>
+    axios.put(`${base}/admin/v1/company/social-network/${id}`, data, withAuth(token));
 
 export const deleteSocialNetwork = (id, token) =>
     axios.delete(`${base}/admin/v1/company/social-network/${id}`, withAuth(token));

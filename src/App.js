@@ -13,8 +13,16 @@ import SubscriptionList from './pages/home/SubscriptionList';
 import SubscriptionForm from './pages/home/SubscriptionForm';
 import ClientSpeakList from './pages/company/clientSpeakList';
 import ClientSpeakForm from './pages/company/clientSpeakForm';
-import newsEventList from './pages/company/newsEventList';
-import newsEventForm from './pages/company/newsEventForm';
+import NewsEventList from './pages/company/newsEventList';
+import NewsEventForm from './pages/company/newsEventForm';
+import CareerList from './pages/company/careerList';
+import CareerForm from './pages/company/careerForm';
+import SocialNetworkList from './pages/company/socialNetworkList';
+import SocialNetworkForm from './pages/company/socialNetworkForm';
+import ProjectList from './pages/portfolio/projectList';
+import ProjectForm from './pages/portfolio/projectForm';
+import ProjectCategoryList from './pages/portfolio/projectCategoryList';
+import ProjectCategoryForm from './pages/portfolio/projectCategoryForm';
 
 function App() {
   return (
@@ -53,9 +61,25 @@ function App() {
             <Route path="/admin/company/clientspeak/new" element={<ClientSpeakForm />} />
             <Route path="/admin/company/clientspeak/:id" element={<ClientSpeakForm />} />
 
-            <Route path="/admin/company/eventandnews" element={<newsEventList />} />
-            <Route path="/admin/company/eventandnews/new" element={<newsEventForm />} />
-            <Route path="/admin/company/eventandnews/:id" element={<newsEventForm />} />
+            <Route path="/admin/company/event-news" element={<NewsEventList />} />
+            <Route path="/admin/company/event-news/new" element={<NewsEventForm />} />
+            <Route path="/admin/company/event-news/:id" element={<NewsEventForm />} />
+
+            <Route path="/admin/company/career" element={<CareerList />} />
+            <Route path="/admin/company/career/new" element={<CareerForm />} />
+            <Route path="/admin/company/career/:id" element={<CareerForm />} />
+
+            <Route path="/admin/company/followus" element={<SocialNetworkList />} />
+            <Route path="/admin/company/followus/new" element={<SocialNetworkForm />} />
+            <Route path="/admin/company/followus/:id" element={<SocialNetworkForm />} />
+
+            <Route path="/admin/portfolio/project" element={<ProjectList />} />
+            <Route path="/admin/portfolio/project/new" element={<ProjectForm />} />
+            <Route path="/admin/portfolio/project/:id" element={<ProjectForm />} />
+
+            <Route path="/admin/portfolio/project-category" element={<ProjectCategoryList />} />
+            <Route path="/admin/portfolio/project-category/new" element={<ProjectCategoryForm />} />
+            <Route path="/admin/portfolio/project-category/:id" element={<ProjectCategoryForm />} />
 
             {/* add other “manage” routes here */}
           </Route>

@@ -1,19 +1,23 @@
 import { useState, useEffect, useContext } from 'react';
-import { createNewsEvent, fetchNewsEventById, updateNewsEvent } from '../../api/company/newsEventApi';
+import { createProject, fetchProjectById, updateProject } from '../../api/portfolio/projectsApi';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../styles/home/BannerList.module.css';
 import { ThreeDots } from 'react-loader-spinner';
 
-export default function NewsEventForm() {
+export default function ProjectForm() {
     const { id } = useParams();
     const isEdit = Boolean(id);
     const [form, setForm] = useState({
-        title: '',
+        selectCategory: '',
         name: '',
-        location: '',
-        date: new Date().toISOString().split('T')[0],
+        title: '',
+        youtubeLink: '',
+        appStoreUrl: '',
+        googlePlayUrl: '',
+        webUrl: '',
         shortDescription: '',
+        displayOrder: 1,
         description: '',
         status: 'active',
         image: ''
@@ -28,11 +32,11 @@ export default function NewsEventForm() {
             setLoading(true);
             (async () => {
                 try {
-                    const res = await fetchNewsEventById(id, token);
+                    const res = await fetchProjectById(id, token);
                     setForm(res.data.data);
                 } catch (error) {
-                    console.error("Error fetching news event for edit:", error);
-                    setErrorModal({ open: true, message: error.response?.data?.error || 'Failed to fetch news event details for editing.' });
+                    console.error("Error fetching project for edit:", error);
+                    setErrorModal({ open: true, message: error.response?.data?.error || 'Failed to fetch project details for editing.' });
                 } finally {
                     setLoading(false);
                 }
@@ -56,17 +60,17 @@ export default function NewsEventForm() {
         setLoading(true);
         try {
             if (isEdit) {
-                await updateNewsEvent(id, form, token);
+                await updateProject(id, form, token);
             } else {
-                await createNewsEvent(form, token);
+                await createProject(form, token);
             }
-            nav('/admin/company/event-news');
+            nav('/admin/portfolio/project');
         } catch (error) {
-            console.error("Error submitting news event:", error);
+            console.error("Error submitting project:", error);
             if (error.response && error.response.status === 400) {
                 setErrorModal({ open: true, message: error.response.data.error });
             } else {
-                setErrorModal({ open: true, message: error.message || (isEdit ? 'Failed to update news event.' : 'Failed to create news event.') });
+                setErrorModal({ open: true, message: error.message || (isEdit ? 'Failed to update project.' : 'Failed to create project.') });
             }
         } finally {
             setLoading(false);
@@ -74,7 +78,7 @@ export default function NewsEventForm() {
     };
 
     const handleCancel = () => {
-        nav('/admin/company/event-news');
+        nav('/admin/portfolio/project');
     };
 
     const closeErrorModal = () => {
@@ -83,14 +87,18 @@ export default function NewsEventForm() {
 
     return (
         <div className="container mt-4">
-            <h2>{isEdit ? 'Edit' : 'New'} News Event</h2>
+            <h2>{isEdit ? 'Edit' : 'New'} Project</h2>
             <form onSubmit={handleSubmit}>
                 {[
-                    { label: 'Title', name: 'title' },
+                    { label: 'Category', name: 'selectCategory' },
                     { label: 'Name', name: 'name' },
-                    { label: 'Location', name: 'location' },
-                    { label: 'Date', name: 'date', type: 'date' },
+                    { label: 'Title', name: 'title' },
+                    { label: 'Youtube Link', name: 'youtubeLink', type: 'url' },
+                    { label: 'App Store URL', name: 'appStoreUrl', type: 'url' },
+                    { label: 'Google Play URL', name: 'googlePlayUrl', type: 'url' },
+                    { label: 'Web URL', name: 'webUrl', type: 'url' },
                     { label: 'Short Description', name: 'shortDescription', type: 'textarea' },
+                    { label: 'Display Order', name: 'displayOrder', type: 'number' },
                     { label: 'Description', name: 'description', type: 'textarea' },
                 ].map(({ label, name, type = 'text' }) => (
                     <div className="mb-3" key={name}>
@@ -101,7 +109,7 @@ export default function NewsEventForm() {
                                 name={name}
                                 value={form[name]}
                                 onChange={handleChange}
-                                required={['title', 'name', 'location', 'date', 'shortDescription', 'description'].includes(name)}
+                                required={['selectCategory', 'name', 'title', 'shortDescription', 'description'].includes(name)}
                                 disabled={loading}
                             />
                         ) : (
@@ -111,7 +119,7 @@ export default function NewsEventForm() {
                                 type={type}
                                 value={form[name]}
                                 onChange={handleChange}
-                                required={['title', 'name', 'location', 'date'].includes(name)}
+                                required={['selectCategory', 'name', 'title'].includes(name)}
                                 disabled={loading}
                             />
                         )}
@@ -143,6 +151,11 @@ export default function NewsEventForm() {
                         required={!isEdit}
                         disabled={loading}
                     />
+                    {form.image && (
+                        <div className="mt-2">
+                            <img src={form.image} alt="Preview" style={{ maxWidth: '200px', height: 'auto' }} />
+                        </div>
+                    )}
                 </div>
 
                 <div className="d-flex gap-2 mt-3">

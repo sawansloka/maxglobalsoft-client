@@ -1,33 +1,26 @@
-// newsEventList.js
+// carrerList.js
 
 import { useState, useEffect, useContext } from 'react';
 import styles from '../../styles/home/BannerList.module.css';
-import { fetchNewsEvents, deleteNewsEvent, fetchNewsEventById } from '../../api/company/newsEventApi';
+import { fetchCareers, deleteCareer, fetchCareerById } from '../../api/company/careerApi';
 import { AuthContext } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { IoCreate } from "react-icons/io5";
+import truncateDescription from "../../components/truncateHelper"
 
-const truncateDescription = (description, maxLength) => {
-    if (!description) return '';
-    if (description.length > maxLength) {
-        return description.substring(0, maxLength) + '...';
-    }
-    return description;
-};
-
-export default function NewsEventList() {
+export default function CareerList() {
     const { token } = useContext(AuthContext);
-    const [newsEvents, setNewsEvents] = useState([]);
+    const [careers, setCareers] = useState([]);
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [menuOpen, setMenuOpen] = useState(null);
-    const [selectedNewsEvent, setSelectedNewsEvent] = useState(null);
+    const [selectedCareer, setSelectedCareer] = useState(null);
     const [deleteConfirmation, setDeleteConfirmation] = useState({
         open: false,
-        newsEventId: null,
+        careerId: null,
     });
     const [errorModal, setErrorModal] = useState({ open: false, message: '' });
     const perPage = 10;
@@ -44,17 +37,17 @@ export default function NewsEventList() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await fetchNewsEvents(token, { page, limit: perPage, search: debouncedSearch });
-                setNewsEvents(res.data.data);
+                const res = await fetchCareers(token, { page, limit: perPage, search: debouncedSearch });
+                setCareers(res.data.data);
                 setTotalPages(Math.ceil(res.data.total / perPage) || 1);
-                window.scrollTo({ top: 0, behavior: 'smooth' }); // scroll to top on page change
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (error) {
-                console.error('Failed to fetch news events:', error);
+                console.error('Failed to fetch careers:', error);
                 if (error.response && error.response.status === 401) {
                     console.log("Unauthorized access. Redirecting to login.");
                     navigate('/admin/login');
                 } else {
-                    setErrorModal({ open: true, message: error.message || 'Failed to fetch news events.' });
+                    setErrorModal({ open: true, message: error.message || 'Failed to fetch careers.' });
                 }
             }
         };
@@ -65,43 +58,43 @@ export default function NewsEventList() {
 
     const handleViewDetails = async (id) => {
         try {
-            const res = await fetchNewsEventById(id, token);
-            setSelectedNewsEvent(res.data.data);
+            const res = await fetchCareerById(id, token);
+            setSelectedCareer(res.data.data);
         } catch (error) {
-            console.error("Failed to fetch news event details:", error);
+            console.error("Failed to fetch career details:", error);
             if (error.response && error.response.status === 401) {
                 console.log("Unauthorized access. Redirecting to login.");
                 navigate('/admin/login');
             } else {
-                setErrorModal({ open: true, message: error.message || 'Failed to fetch news event details.' });
+                setErrorModal({ open: true, message: error.message || 'Failed to fetch career details.' });
             }
         }
         setMenuOpen(null);
     };
 
-    const closeModal = () => setSelectedNewsEvent(null);
+    const closeModal = () => setSelectedCareer(null);
 
     const openDeleteConfirmation = (id) => {
-        setDeleteConfirmation({ open: true, newsEventId: id });
+        setDeleteConfirmation({ open: true, careerId: id });
         setMenuOpen(null);
     };
 
     const closeDeleteConfirmation = () => {
-        setDeleteConfirmation({ open: false, newsEventId: null });
+        setDeleteConfirmation({ open: false, careerId: null });
     };
 
     const handleDeleteConfirm = async () => {
         try {
-            await deleteNewsEvent(deleteConfirmation.newsEventId, token);
-            setNewsEvents(prev => prev.filter(ne => ne._id !== deleteConfirmation.newsEventId));
+            await deleteCareer(deleteConfirmation.careerId, token);
+            setCareers(prev => prev.filter(career => career._id !== deleteConfirmation.careerId));
             closeDeleteConfirmation();
         } catch (err) {
-            console.error("Failed to delete news event:", err);
+            console.error("Failed to delete career:", err);
             if (err.response && err.response.status === 401) {
                 console.log("Unauthorized access. Redirecting to login.");
                 navigate('/admin/login');
             } else {
-                setErrorModal({ open: true, message: err.message || 'Failed to delete news event.' });
+                setErrorModal({ open: true, message: err.message || 'Failed to delete career.' });
             }
         }
     };
@@ -113,16 +106,16 @@ export default function NewsEventList() {
     return (
         <>
             <div className={styles.header}>
-                <h1 className={styles.title}>News & Events</h1>
+                <h1 className={styles.title}>Career Opportunities</h1>
                 <input
                     className={styles.searchInput}
-                    placeholder="Search news & events..."
+                    placeholder="Search job types..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                 />
-                <Link to="/admin/company/event-news/new">
+                <Link to="/admin/company/career/new">
                     <button className={styles.newButton}>
-                        <span className={styles.boldText3}><IoCreate /> New Event</span>
+                        <span className={styles.boldText3}><IoCreate /> New Job</span>
                     </button>
                 </Link>
             </div>
@@ -132,8 +125,8 @@ export default function NewsEventList() {
                     <table className={styles.table}>
                         <thead>
                             <tr>
-                                <th>NEWS TITLE</th>
-                                <th>NAME</th>
+                                <th>JOB TYPE</th>
+                                <th>EXPERIENCE</th>
                                 <th>IMAGE</th>
                                 <th>DESCRIPTION</th>
                                 <th>STATUS</th>
@@ -141,42 +134,42 @@ export default function NewsEventList() {
                             </tr>
                         </thead>
                         <tbody>
-                            {newsEvents.map(ne => (
-                                <tr key={ne._id}>
-                                    <td>{ne.title}</td>
-                                    <td>{ne.name}</td>
+                            {careers.map(career => (
+                                <tr key={career._id}>
+                                    <td>{career.jobTypes}</td>
+                                    <td>{career.totalExp}</td>
                                     <td>
-                                        {ne.image ? (
+                                        {career.image ? (
                                             <img
-                                                src={ne.image}
-                                                alt={ne.title}
+                                                src={career.image}
+                                                alt={career.jobTypes}
                                                 style={{ maxWidth: '100px', height: 'auto' }}
                                             />
                                         ) : 'No Image'}
                                     </td>
-                                    <td className={styles.descriptionCell}>{truncateDescription(ne.shortDescription, 100)}</td>
-                                    <td>{ne.status}</td>
+                                    <td className={styles.descriptionCell}>{truncateDescription(career.shortDescription, 100)}</td>
+                                    <td>{career.status}</td>
                                     <td>
                                         <div className={styles.dropdown}>
-                                            <button className={styles.actionBtn} onClick={() => toggleMenu(ne._id)}>
+                                            <button className={styles.actionBtn} onClick={() => toggleMenu(career._id)}>
                                                 <span className={styles.boldText2}>⋮</span>
                                             </button>
-                                            {menuOpen === ne._id && (
+                                            {menuOpen === career._id && (
                                                 <div className={styles.menu}>
                                                     <div
                                                         className={styles.menuItem}
-                                                        onClick={() => handleViewDetails(ne._id)}
+                                                        onClick={() => handleViewDetails(career._id)}
                                                     >
                                                         <FaEye style={{ marginRight: '8px' }} />
                                                         <span className={styles.boldText}>View Details</span>
                                                     </div>
-                                                    <Link to={`/admin/company/event-news/${ne._id}`} className={styles.menuItem}>
+                                                    <Link to={`/admin/company/career/${career._id}`} className={styles.menuItem}>
                                                         <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
                                                         <span className={styles.boldText}>Edit</span>
                                                     </Link>
                                                     <div
                                                         className={styles.menuItem}
-                                                        onClick={() => openDeleteConfirmation(ne._id)}
+                                                        onClick={() => openDeleteConfirmation(career._id)}
                                                     >
                                                         <FaTrash style={{ color: 'red', marginRight: '8px' }} />
                                                         <span className={styles.boldText}>Remove</span>
@@ -209,19 +202,19 @@ export default function NewsEventList() {
                 </ul>
             </div>
 
-            {selectedNewsEvent && (
+            {selectedCareer && (
                 <div className={styles.modalOverlay} onClick={closeModal}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
                         <button className={styles.closeButton} onClick={closeModal}>✕</button>
-                        <h2>{selectedNewsEvent.title}</h2>
-                        <p><strong>Name:</strong> {selectedNewsEvent.name}</p>
-                        <p><strong>Location:</strong> {selectedNewsEvent.location}</p>
-                        <p><strong>Date:</strong> {new Date(selectedNewsEvent.date).toLocaleDateString()}</p>
-                        <p><strong>Status:</strong> {selectedNewsEvent.status}</p>
-                        <p><strong>Short Description:</strong> {selectedNewsEvent.shortDescription}</p>
-                        <p><strong>Description:</strong> {selectedNewsEvent.description}</p>
-                        {selectedNewsEvent.image && (
-                            <img src={selectedNewsEvent.image} alt={selectedNewsEvent.title} className={styles.modalImage} />
+                        <h2>{selectedCareer.jobTypes}</h2>
+                        <p><strong>Total Experience:</strong> {selectedCareer.totalExp}</p>
+                        <p><strong>Location:</strong> {selectedCareer.location}</p>
+                        <p><strong>Date:</strong> {new Date(selectedCareer.date).toLocaleDateString()}</p>
+                        <p><strong>Status:</strong> {selectedCareer.status}</p>
+                        <p><strong>Short Description:</strong> {selectedCareer.shortDescription}</p>
+                        <p><strong>Description:</strong> {selectedCareer.description}</p>
+                        {selectedCareer.image && (
+                            <img src={selectedCareer.image} alt={selectedCareer.jobTypes} className={styles.modalImage} />
                         )}
                     </div>
                 </div>
@@ -232,7 +225,7 @@ export default function NewsEventList() {
                 <div className={styles.modalOverlay} onClick={closeDeleteConfirmation}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
                         <h2 style={{ marginBottom: '15px' }}>Confirm Delete</h2>
-                        <p style={{ marginBottom: '20px' }}>Are you sure you want to delete this news event?</p>
+                        <p style={{ marginBottom: '20px' }}>Are you sure you want to delete this career opportunity?</p>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                             <button className={styles.cancelButton} onClick={closeDeleteConfirmation}>Cancel</button>
                             <button className={styles.createButton} onClick={handleDeleteConfirm}>Delete</button>

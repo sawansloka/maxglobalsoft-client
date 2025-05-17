@@ -1,80 +1,97 @@
 import { useState, useEffect, useContext } from 'react';
-import { createNewsEvent, fetchNewsEventById, updateNewsEvent } from '../../api/company/newsEventApi';
+import {
+    createSocialNetwork,
+    updateSocialNetwork,
+    fetchSocialNetworkById,
+} from '../../api/company/socialNetworkApi';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from '../../styles/home/BannerList.module.css';
 import { ThreeDots } from 'react-loader-spinner';
 
-export default function NewsEventForm() {
-    const { id } = useParams();
-    const isEdit = Boolean(id);
+export default function SocialNetworkForm() {
     const [form, setForm] = useState({
-        title: '',
-        name: '',
-        location: '',
-        date: new Date().toISOString().split('T')[0],
+        facebookLink: '',
+        googlePlusLink: '',
+        twitterLink: '',
+        youtubeLink: '',
+        linkedlnLink: '',
+        instagramLink: '',
         shortDescription: '',
-        description: '',
         status: 'active',
-        image: ''
     });
+
     const { token } = useContext(AuthContext);
     const nav = useNavigate();
     const [loading, setLoading] = useState(false);
     const [errorModal, setErrorModal] = useState({ open: false, message: '' });
+    const { id } = useParams();
+    const isEdit = !!id;
+    const [documentId, setDocumentId] = useState(null);
 
     useEffect(() => {
-        if (isEdit) {
+        const fetchData = async () => {
             setLoading(true);
-            (async () => {
-                try {
-                    const res = await fetchNewsEventById(id, token);
-                    setForm(res.data.data);
-                } catch (error) {
-                    console.error("Error fetching news event for edit:", error);
-                    setErrorModal({ open: true, message: error.response?.data?.error || 'Failed to fetch news event details for editing.' });
-                } finally {
-                    setLoading(false);
+            try {
+                if (isEdit && id) {
+                    const res = await fetchSocialNetworkById(id, token);
+                    if (res.data.data) {
+                        setForm(res.data.data);
+                        setDocumentId(res.data.data._id);
+                    } else {
+                        setErrorModal({ open: true, message: 'Social network data not found.' });
+                    }
                 }
-            })();
+            } catch (error) {
+                console.error("Error fetching social network data:", error);
+                setErrorModal({
+                    open: true,
+                    message: error.response?.data?.error || 'Failed to fetch social network details.',
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (isEdit) {
+            fetchData();
+        } else {
+            setLoading(false);
         }
-    }, [id, isEdit, token]);
+    }, [token, id, isEdit]);
 
     const handleChange = e => {
-        const { name, value, files } = e.target;
-        if (name === 'image' && files[0]) {
-            const reader = new FileReader();
-            reader.onload = () => setForm(f => ({ ...f, image: reader.result }));
-            reader.readAsDataURL(files[0]);
-        } else {
-            setForm(f => ({ ...f, [name]: value }));
-        }
+        const { name, value } = e.target;
+        setForm(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async e => {
         e.preventDefault();
         setLoading(true);
         try {
-            if (isEdit) {
-                await updateNewsEvent(id, form, token);
+            if (isEdit && documentId) {
+                // Create a new object without the _id
+                const updateData = { ...form };
+                delete updateData._id; // Explicitly remove _id
+
+                await updateSocialNetwork(documentId, updateData, token);
             } else {
-                await createNewsEvent(form, token);
+                await createSocialNetwork(form, token);
             }
-            nav('/admin/company/event-news');
+            nav('/admin/company/followus');
         } catch (error) {
-            console.error("Error submitting news event:", error);
-            if (error.response && error.response.status === 400) {
-                setErrorModal({ open: true, message: error.response.data.error });
-            } else {
-                setErrorModal({ open: true, message: error.message || (isEdit ? 'Failed to update news event.' : 'Failed to create news event.') });
-            }
+            console.error("Error submitting social network data:", error);
+            setErrorModal({
+                open: true,
+                message: error.response?.data?.error || (isEdit ? 'Failed to update social network.' : 'Failed to create social network.'),
+            });
         } finally {
             setLoading(false);
         }
     };
 
     const handleCancel = () => {
-        nav('/admin/company/event-news');
+        nav('/admin/company/followus');
     };
 
     const closeErrorModal = () => {
@@ -83,15 +100,16 @@ export default function NewsEventForm() {
 
     return (
         <div className="container mt-4">
-            <h2>{isEdit ? 'Edit' : 'New'} News Event</h2>
+            <h2>{isEdit ? 'Edit' : 'New'} Follow Us Links</h2>
             <form onSubmit={handleSubmit}>
                 {[
-                    { label: 'Title', name: 'title' },
-                    { label: 'Name', name: 'name' },
-                    { label: 'Location', name: 'location' },
-                    { label: 'Date', name: 'date', type: 'date' },
+                    { label: 'Facebook Link', name: 'facebookLink', type: 'url' },
+                    { label: 'Google Plus Link', name: 'googlePlusLink', type: 'url' },
+                    { label: 'Twitter Link', name: 'twitterLink', type: 'url' },
+                    { label: 'YouTube Link', name: 'youtubeLink', type: 'url' },
+                    { label: 'LinkedIn Link', name: 'linkedlnLink', type: 'url' },
+                    { label: 'Instagram Link', name: 'instagramLink', type: 'url' },
                     { label: 'Short Description', name: 'shortDescription', type: 'textarea' },
-                    { label: 'Description', name: 'description', type: 'textarea' },
                 ].map(({ label, name, type = 'text' }) => (
                     <div className="mb-3" key={name}>
                         <label>{label}</label>
@@ -101,8 +119,8 @@ export default function NewsEventForm() {
                                 name={name}
                                 value={form[name]}
                                 onChange={handleChange}
-                                required={['title', 'name', 'location', 'date', 'shortDescription', 'description'].includes(name)}
                                 disabled={loading}
+                                required
                             />
                         ) : (
                             <input
@@ -111,8 +129,8 @@ export default function NewsEventForm() {
                                 type={type}
                                 value={form[name]}
                                 onChange={handleChange}
-                                required={['title', 'name', 'location', 'date'].includes(name)}
                                 disabled={loading}
+                                required
                             />
                         )}
                     </div>
@@ -132,37 +150,11 @@ export default function NewsEventForm() {
                     </select>
                 </div>
 
-                <div className="mb-3">
-                    <label>Image (base64 upload)</label>
-                    <input
-                        className="form-control-file"
-                        type="file"
-                        name="image"
-                        accept="image/*"
-                        onChange={handleChange}
-                        required={!isEdit}
-                        disabled={loading}
-                    />
-                </div>
-
                 <div className="d-flex gap-2 mt-3">
-                    <button
-                        className={styles.createButton}
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <ThreeDots color="#fff" height={20} width={40} />
-                        ) : (
-                            isEdit ? 'Update' : 'Create'
-                        )}
+                    <button className={styles.createButton} type="submit" disabled={loading}>
+                        {loading ? <ThreeDots color="#fff" height={20} width={40} /> : isEdit ? 'Update' : 'Create'}
                     </button>
-                    <button
-                        type="button"
-                        className={styles.cancelButton}
-                        onClick={handleCancel}
-                        disabled={loading}
-                    >
+                    <button type="button" className={styles.cancelButton} onClick={handleCancel} disabled={loading}>
                         Cancel
                     </button>
                 </div>
