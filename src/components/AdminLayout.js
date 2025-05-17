@@ -30,8 +30,8 @@ const AdminLayout = () => {
         {
             title: 'Company',
             links: [
-                { to: '/admin/company/eventandnews', label: 'Manage News & Events' },
-                { to: '/admin/company/clientspeak', label: 'Manage Client Speak' },
+                { to: '/admin/company/event-news', label: 'Manage News & Events' },
+                { to: '/admin/company/client-speak', label: 'Manage Client Speak' },
                 { to: '/admin/company/career', label: 'Manage career' },
                 { to: '/admin/company/followus', label: 'Manage Social Network' },
             ],
@@ -39,8 +39,8 @@ const AdminLayout = () => {
         {
             title: 'Portfolio',
             links: [
-                { to: '/portfolio', label: 'Projects' },
-                { to: '/portfolioCategory', label: 'Project Category' }
+                { to: '/admin/portfolio/project', label: 'Projects' },
+                { to: '/admin/portfolio/project-category', label: 'Project Category' }
             ]
         },
         {
