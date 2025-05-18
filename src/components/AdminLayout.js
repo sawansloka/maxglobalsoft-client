@@ -46,21 +46,21 @@ const AdminLayout = () => {
         {
             title: 'Clients & Partners',
             links: [
-                { to: '/clients', label: 'Manage Clients' },
-                { to: '/partners', label: 'Manage Partners' }
+                { to: '/admin/partner/client', label: 'Manage Clients' },
+                { to: '/admin/partner/partner', label: 'Manage Partners' }
             ]
         },
         {
             title: 'Manage Pages',
             links: [
-                { to: '/staticpages', label: 'Create Pages' },
-                { to: '/managemenu', label: 'Manage Menu' }
+                { to: '/admin/page/page', label: 'Create Pages' },
+                { to: '/admin/page/menu', label: 'Manage Menu' }
             ]
         },
         {
             title: 'Manage Job-Application',
             links: [
-                { to: '/jobapplications', label: 'Manage Application' }
+                { to: '/admin/application/job-application', label: 'Manage Application' }
             ]
         }
     ];
