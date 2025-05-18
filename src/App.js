@@ -23,6 +23,16 @@ import ProjectList from './pages/portfolio/projectList';
 import ProjectForm from './pages/portfolio/projectForm';
 import ProjectCategoryList from './pages/portfolio/projectCategoryList';
 import ProjectCategoryForm from './pages/portfolio/projectCategoryForm';
+import ClientList from './pages/partner/clientList';
+import ClientForm from './pages/partner/clientForm';
+import PartnerList from './pages/partner/partnerList';
+import PartnerForm from './pages/partner/partnerForm';
+import PageList from './pages/page/pageList';
+import PageForm from './pages/page/pageForm';
+import MenuList from './pages/page/menuList';
+import MenuForm from './pages/page/menuForm';
+import ApplicationList from './pages/application/applicationList';
+import ApplicationForm from './pages/application/applicationForm';
 
 function App() {
   return (
@@ -80,6 +90,26 @@ function App() {
             <Route path="/admin/portfolio/project-category" element={<ProjectCategoryList />} />
             <Route path="/admin/portfolio/project-category/new" element={<ProjectCategoryForm />} />
             <Route path="/admin/portfolio/project-category/:id" element={<ProjectCategoryForm />} />
+
+            <Route path="/admin/partner/client" element={<ClientList />} />
+            <Route path="/admin/partner/client/new" element={<ClientForm />} />
+            <Route path="/admin/partner/client/:id" element={<ClientForm />} />
+
+            <Route path="/admin/partner/partner" element={<PartnerList />} />
+            <Route path="/admin/partner/partner/new" element={<PartnerForm />} />
+            <Route path="/admin/partner/partner/:id" element={<PartnerForm />} />
+
+            <Route path="/admin/page/page" element={<PageList />} />
+            <Route path="/admin/page/page/new" element={<PageForm />} />
+            <Route path="/admin/page/page/:id" element={<PageForm />} />
+
+            <Route path="/admin/page/menu" element={<MenuList />} />
+            <Route path="/admin/page/menu/new" element={<MenuForm />} />
+            <Route path="/admin/page/menu/:id" element={<MenuForm />} />
+
+            <Route path="/admin/application/job-application" element={<ApplicationList />} />
+            <Route path="/admin/application/job-application/new" element={<ApplicationForm />} />
+            <Route path="/admin/application/job-application/:id" element={<ApplicationForm />} />
 
             {/* add other “manage” routes here */}
           </Route>
