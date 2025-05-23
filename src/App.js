@@ -67,9 +67,9 @@ function App() {
             <Route path="/admin/home/subscription/new" element={<SubscriptionForm />} />
             <Route path="/admin/home/subscription/:id" element={<SubscriptionForm />} />
 
-            <Route path="/admin/company/clientspeak" element={<ClientSpeakList />} />
-            <Route path="/admin/company/clientspeak/new" element={<ClientSpeakForm />} />
-            <Route path="/admin/company/clientspeak/:id" element={<ClientSpeakForm />} />
+            <Route path="/admin/company/client-speak" element={<ClientSpeakList />} />
+            <Route path="/admin/company/client-speak/new" element={<ClientSpeakForm />} />
+            <Route path="/admin/company/client-speak/:id" element={<ClientSpeakForm />} />
 
             <Route path="/admin/company/event-news" element={<NewsEventList />} />
             <Route path="/admin/company/event-news/new" element={<NewsEventForm />} />
@@ -79,8 +79,8 @@ function App() {
             <Route path="/admin/company/career/new" element={<CareerForm />} />
             <Route path="/admin/company/career/:id" element={<CareerForm />} />
 
-            <Route path="/admin/company/followus" element={<SocialNetworkList />} />
-            <Route path="/admin/company/followus/new" element={<SocialNetworkForm />} />
+            <Route path="/admin/company/follow-us" element={<SocialNetworkList />} />
+            <Route path="/admin/company/follow-us/new" element={<SocialNetworkForm />} />
             <Route path="/admin/company/followus/:id" element={<SocialNetworkForm />} />
 
             <Route path="/admin/portfolio/project" element={<ProjectList />} />
@@ -111,10 +111,8 @@ function App() {
             <Route path="/admin/application/job-application/new" element={<ApplicationForm />} />
             <Route path="/admin/application/job-application/:id" element={<ApplicationForm />} />
 
-            {/* add other “manage” routes here */}
           </Route>
 
-          {/* Redirect to /admin/home/banners as the default protected route */}
           <Route path="/" element={<Navigate to="/admin/home/banners" replace />} />
           <Route path="*" element={<Navigate to="/admin/home/banners" replace />} />
         </Routes>

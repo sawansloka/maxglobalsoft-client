@@ -1,5 +1,3 @@
-// newsEventList.js
-
 import { useState, useEffect, useContext } from 'react';
 import styles from '../../styles/App.module.css';
 import { fetchNewsEvents, deleteNewsEvent, fetchNewsEventById } from '../../api/company/newsEventApi';
@@ -7,6 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { IoCreate } from "react-icons/io5";
+import { ThreeDots } from 'react-loader-spinner';
 
 const truncateDescription = (description, maxLength) => {
     if (!description) return '';
@@ -30,6 +29,7 @@ export default function NewsEventList() {
         newsEventId: null,
     });
     const [errorModal, setErrorModal] = useState({ open: false, message: '' });
+    const [loading, setLoading] = useState(false);
     const perPage = 10;
     const navigate = useNavigate();
 
@@ -43,19 +43,21 @@ export default function NewsEventList() {
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
                 const res = await fetchNewsEvents(token, { page, limit: perPage, search: debouncedSearch });
                 setNewsEvents(res.data.data);
                 setTotalPages(Math.ceil(res.data.total / perPage) || 1);
-                window.scrollTo({ top: 0, behavior: 'smooth' }); // scroll to top on page change
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (error) {
                 console.error('Failed to fetch news events:', error);
                 if (error.response && error.response.status === 401) {
-                    console.log("Unauthorized access. Redirecting to login.");
                     navigate('/admin/login');
                 } else {
                     setErrorModal({ open: true, message: error.message || 'Failed to fetch news events.' });
                 }
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
@@ -64,17 +66,19 @@ export default function NewsEventList() {
     const toggleMenu = (id) => setMenuOpen(menuOpen === id ? null : id);
 
     const handleViewDetails = async (id) => {
+        setLoading(true);
         try {
             const res = await fetchNewsEventById(id, token);
             setSelectedNewsEvent(res.data.data);
         } catch (error) {
             console.error("Failed to fetch news event details:", error);
             if (error.response && error.response.status === 401) {
-                console.log("Unauthorized access. Redirecting to login.");
                 navigate('/admin/login');
             } else {
                 setErrorModal({ open: true, message: error.message || 'Failed to fetch news event details.' });
             }
+        } finally {
+            setLoading(false);
         }
         setMenuOpen(null);
     };
@@ -91,6 +95,7 @@ export default function NewsEventList() {
     };
 
     const handleDeleteConfirm = async () => {
+        setLoading(true);
         try {
             await deleteNewsEvent(deleteConfirmation.newsEventId, token);
             setNewsEvents(prev => prev.filter(ne => ne._id !== deleteConfirmation.newsEventId));
@@ -98,11 +103,12 @@ export default function NewsEventList() {
         } catch (err) {
             console.error("Failed to delete news event:", err);
             if (err.response && err.response.status === 401) {
-                console.log("Unauthorized access. Redirecting to login.");
                 navigate('/admin/login');
             } else {
                 setErrorModal({ open: true, message: err.message || 'Failed to delete news event.' });
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -129,66 +135,72 @@ export default function NewsEventList() {
 
             <div className={styles.pageWrapper}>
                 <div className={styles.content}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>NEWS TITLE</th>
-                                <th>NAME</th>
-                                <th>IMAGE</th>
-                                <th>DESCRIPTION</th>
-                                <th>STATUS</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {newsEvents.map(ne => (
-                                <tr key={ne._id}>
-                                    <td>{ne.title}</td>
-                                    <td>{ne.name}</td>
-                                    <td>
-                                        {ne.image ? (
-                                            <img
-                                                src={ne.image}
-                                                alt={ne.title}
-                                                style={{ maxWidth: '100px', height: 'auto' }}
-                                            />
-                                        ) : 'No Image'}
-                                    </td>
-                                    <td className={styles.descriptionCell}>{truncateDescription(ne.shortDescription, 100)}</td>
-                                    <td>{ne.status}</td>
-                                    <td>
-                                        <div className={styles.dropdown}>
-                                            <button className={styles.actionBtn} onClick={() => toggleMenu(ne._id)}>
-                                                <span className={styles.boldText2}>⋮</span>
-                                            </button>
-                                            {menuOpen === ne._id && (
-                                                <div className={styles.menu}>
-                                                    <div
-                                                        className={styles.menuItem}
-                                                        onClick={() => handleViewDetails(ne._id)}
-                                                    >
-                                                        <FaEye style={{ marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>View Details</span>
-                                                    </div>
-                                                    <Link to={`/admin/company/event-news/${ne._id}`} className={styles.menuItem}>
-                                                        <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>Edit</span>
-                                                    </Link>
-                                                    <div
-                                                        className={styles.menuItem}
-                                                        onClick={() => openDeleteConfirmation(ne._id)}
-                                                    >
-                                                        <FaTrash style={{ color: 'red', marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>Remove</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </td>
+                    {loading && newsEvents.length === 0 ? (
+                        <div className="d-flex justify-content-center">
+                            <ThreeDots color="#4a5568" height={80} width={80} />
+                        </div>
+                    ) : (
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>NEWS TITLE</th>
+                                    <th>NAME</th>
+                                    <th>IMAGE</th>
+                                    <th>DESCRIPTION</th>
+                                    <th>STATUS</th>
+                                    <th>ACTION</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {newsEvents.map(ne => (
+                                    <tr key={ne._id}>
+                                        <td>{ne.title}</td>
+                                        <td>{ne.name}</td>
+                                        <td>
+                                            {ne.image ? (
+                                                <img
+                                                    src={ne.image}
+                                                    alt={ne.title}
+                                                    style={{ maxWidth: '100px', height: 'auto' }}
+                                                />
+                                            ) : 'No Image'}
+                                        </td>
+                                        <td className={styles.descriptionCell}>{truncateDescription(ne.shortDescription, 100)}</td>
+                                        <td>{ne.status}</td>
+                                        <td>
+                                            <div className={styles.dropdown}>
+                                                <button className={styles.actionBtn} onClick={() => toggleMenu(ne._id)}>
+                                                    <span className={styles.boldText2}>⋮</span>
+                                                </button>
+                                                {menuOpen === ne._id && (
+                                                    <div className={styles.menu}>
+                                                        <div
+                                                            className={styles.menuItem}
+                                                            onClick={() => handleViewDetails(ne._id)}
+                                                        >
+                                                            <FaEye style={{ marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>View Details</span>
+                                                        </div>
+                                                        <Link to={`/admin/company/event-news/${ne._id}`} className={styles.menuItem}>
+                                                            <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>Edit</span>
+                                                        </Link>
+                                                        <div
+                                                            className={styles.menuItem}
+                                                            onClick={() => openDeleteConfirmation(ne._id)}
+                                                        >
+                                                            <FaTrash style={{ color: 'red', marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>Remove</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
 
                 <ul className={styles.pagination}>
@@ -227,7 +239,6 @@ export default function NewsEventList() {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
             {deleteConfirmation.open && (
                 <div className={styles.modalOverlay} onClick={closeDeleteConfirmation}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -235,13 +246,14 @@ export default function NewsEventList() {
                         <p style={{ marginBottom: '20px' }}>Are you sure you want to delete this news event?</p>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                             <button className={styles.cancelButton} onClick={closeDeleteConfirmation}>Cancel</button>
-                            <button className={styles.createButton} onClick={handleDeleteConfirm}>Delete</button>
+                            <button className={styles.createButton} onClick={handleDeleteConfirm} disabled={loading}>
+                                {loading ? <ThreeDots color="#fff" height={20} width={40} /> : 'Delete'}
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Error Modal */}
             {errorModal.open && (
                 <div className={styles.modalOverlay} onClick={closeErrorModal}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
