@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { createProject, fetchProjectById, updateProject } from '../../api/portfolio/projectsApi';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import styles from '../../styles/home/BannerList.module.css';
+import styles from '../../styles/App.module.css';
 import { ThreeDots } from 'react-loader-spinner';
 
 export default function ProjectForm() {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import styles from '../../styles/home/BannerList.module.css';
+import styles from '../../styles/App.module.css';
 import {
     fetchProjectCategories,
     deleteProjectCategory,
@@ -9,7 +9,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { IoCreate } from "react-icons/io5";
-import { ThreeDots } from 'react-loader-spinner'; // Import ThreeDots for loading
+import { ThreeDots } from 'react-loader-spinner';
 
 export default function ProjectCategoryList() {
     const { token } = useContext(AuthContext);

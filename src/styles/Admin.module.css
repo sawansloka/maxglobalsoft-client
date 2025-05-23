@@ -1,4 +1,5 @@
 /* Collapsible Sidebar Styles */
+
 .container {
   display: flex;
   height: 100vh;
@@ -16,7 +17,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   border-right: 1px solid #4a5568;
   transition: width 0.3s ease;
-  position: relative;
+  position: relative; /* Keep relative for toggle button positioning */
 }
 
 .sidebarCollapsed {
@@ -32,6 +33,13 @@
   color: #c8cace;
   transition: background 0.3s ease;
   z-index: 100;
+  padding: 8px; /* Add padding for better touch target */
+  border-radius: 50%; /* Make it round */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  top: 5.5%;
 }
 
 .toggleButton:hover {
@@ -53,7 +61,7 @@
   transition: opacity 0.3s ease;
 }
 
-.sidebarCollapsed .boldText { 
+.sidebarCollapsed .boldText {
   display: none;
 }
 
@@ -61,15 +69,15 @@
   display: none;
 }
 
-.sidebarCollapsed .navLink span { 
+.sidebarCollapsed .navLink span {
   display: none;
 }
 
 .sidebarCollapsed .sidebarHeading {
   justify-content: center;
-  gap: 0.5px; 
+  gap: 0.5px;
+  margin-left: 25%; /* Reset margin */
   transform: translateY(120px);
-  margin-left: 25%;
 }
 
 .sidebarCollapsed .sidebarIcon {
@@ -79,16 +87,20 @@
 }
 
 .sidebarCollapsed .expandIcon {
-  /* transform: translateY(120px); */
 }
 
+.sidebarNavContent {
+  flex-grow: 1; /* Allows this section to take up available space */
+  overflow-y: auto; /* Enables scrolling for navigation links */
+  padding-bottom: 20px; /* Add padding to the bottom of the scrollable area */
+}
 
 .nav {
   margin-bottom: 20px;
 }
 
-.sidebarCollapsed .nav{
-  
+.sidebarCollapsed .nav {
+  /* No specific changes needed here, as modal handles collapsed dropdowns */
 }
 
 .navLink {
@@ -130,30 +142,32 @@
 }
 
 .expandArrow {
+  /* Removed transform: translateY(-15px); */
+  display: flex; /* Ensure proper alignment */
+  align-items: center;
   transform: translateY(-15px);
 }
-
-
 
 .groupTitle {
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
+  margin-bottom: 10px; /* Add space below group title */
 }
 
 .boldText {
   font-weight: bold;
   color: #c8cace;
-  padding-bottom: 70px;
-  margin-top: 30px;
+  padding-bottom: 70px; /* Reduced padding */
+  margin-top: 30px; /* Reduced margin */
   transition: opacity 0.3s ease;
 }
 
 .footerWrapper {
-  position: absolute;
-  bottom: 10px;
-  left: 0;
+  /* Removed absolute positioning */
+  margin-top: auto; /* Pushes footer to the bottom of the flex container */
+  padding-top: 20px; /* Add some space above the footer */
   display: flex;
   justify-content: center;
   width: 100%;
@@ -166,7 +180,7 @@
   border-radius: 0.375rem;
 }
 
-.sidebarCollapsed .dropdownNav{
+.sidebarCollapsed .dropdownNav {
   position: relative;
 }
 
@@ -195,16 +209,14 @@
   transition: opacity 0.3s ease;
 }
 
-/* Modal dropdown style */
 .modal .dropdownNav {
-  background-color: #3a4758; /* Same as sidebar */
-  border-left: 3px solid #4299e1; /* Same border as sidebar */
-  padding-left: 12px; /* Same padding as sidebar */
-  border-radius: 0.375rem; /* Same border radius */
+  background-color: #3a4758;
+  border-left: 3px solid #4299e1;
+  padding-left: 12px;
+  border-radius: 0.375rem;
   margin-top: 10px;
 }
 
-/* Apply styling for the links inside modal dropdown */
 .modal .dropdownNav .navLink {
   color: #fff;
   padding: 8px 12px;
@@ -213,7 +225,6 @@
   transition: background-color 0.3s ease;
 }
 
-/* Apply active and hover effects */
 .modal .dropdownNav .navLink:hover {
   background-color: #555;
 }
@@ -221,4 +232,15 @@
 .modal .dropdownNav .navLinkActive {
   background-color: #007bff;
   color: white;
+}
+
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+      transform: scale(0.95);
+  }
+  to {
+      opacity: 1;
+      transform: scale(1);
+  }
 }

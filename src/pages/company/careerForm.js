@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { createCareer, fetchCareerById, updateCareer } from '../../api/company/careerApi';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import styles from '../../styles/home/BannerList.module.css';
+import styles from '../../styles/App.module.css';
 import { ThreeDots } from 'react-loader-spinner';
 
 export default function CareerForm() {

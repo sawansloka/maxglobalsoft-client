@@ -1,7 +1,5 @@
-// CompanyValueList.js
-
 import { useState, useEffect, useContext } from 'react';
-import styles from '../../styles/home/BannerList.module.css'; // Reusing styles
+import styles from '../../styles/App.module.css';
 import {
     fetchCompanyValues,
     deleteCompanyValue,
@@ -11,6 +9,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { IoCreate } from "react-icons/io5";
+import { ThreeDots } from 'react-loader-spinner';
 
 export default function CompanyValueList() {
     const { token } = useContext(AuthContext);
@@ -26,6 +25,7 @@ export default function CompanyValueList() {
         companyValueId: null,
     });
     const [errorModal, setErrorModal] = useState({ open: false, message: '' });
+    const [loading, setLoading] = useState(false);
     const perPage = 10;
     const navigate = useNavigate();
 
@@ -39,6 +39,7 @@ export default function CompanyValueList() {
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
                 const res = await fetchCompanyValues(token, { page, limit: perPage, search: debouncedSearch });
                 setCompanyValues(res.data.data);
@@ -52,6 +53,8 @@ export default function CompanyValueList() {
                 } else {
                     setErrorModal({ open: true, message: error.message || 'Failed to fetch company values.' });
                 }
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
@@ -60,6 +63,7 @@ export default function CompanyValueList() {
     const toggleMenu = (id) => setMenuOpen(menuOpen === id ? null : id);
 
     const handleViewDetails = async (id) => {
+        setLoading(true);
         try {
             const res = await fetchCompanyValueById(id, token);
             setSelectedCompanyValue(res.data.data);
@@ -71,6 +75,8 @@ export default function CompanyValueList() {
             } else {
                 setErrorModal({ open: true, message: error.message || 'Failed to fetch company value details.' });
             }
+        } finally {
+            setLoading(false);
         }
         setMenuOpen(null);
     };
@@ -87,6 +93,7 @@ export default function CompanyValueList() {
     };
 
     const handleDeleteConfirm = async () => {
+        setLoading(true);
         try {
             await deleteCompanyValue(deleteConfirmation.companyValueId, token);
             setCompanyValues(prev => prev.filter(cv => cv._id !== deleteConfirmation.companyValueId));
@@ -99,6 +106,8 @@ export default function CompanyValueList() {
             } else {
                 setErrorModal({ open: true, message: err.message || 'Failed to delete company value.' });
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -125,64 +134,70 @@ export default function CompanyValueList() {
 
             <div className={styles.pageWrapper}>
                 <div className={styles.content}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>ORDER</th>
-                                <th>TITLE</th>
-                                <th>IMAGE</th>
-                                <th>STATUS</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {companyValues.map(cv => (
-                                <tr key={cv._id}>
-                                    <td>{cv.displayOrder}</td>
-                                    <td>{cv.companyTitle}</td>
-                                    <td>
-                                        {cv.image ? (
-                                            <img
-                                                src={cv.image}
-                                                alt={cv.companyTitle}
-                                                style={{ maxWidth: '100px', height: 'auto' }}
-                                            />
-                                        ) : 'No Image'}
-                                    </td>
-                                    <td>{cv.status}</td>
-                                    <td>
-                                        <div className={styles.dropdown}>
-                                            <button className={styles.actionBtn} onClick={() => toggleMenu(cv._id)}>
-                                                <span className={styles.boldText2}>⋮</span>
-                                            </button>
-                                            {menuOpen === cv._id && (
-                                                <div className={styles.menu}>
-                                                    <div
-                                                        className={styles.menuItem}
-                                                        onClick={() => handleViewDetails(cv._id)}
-                                                    >
-                                                        <FaEye style={{ marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>View Details</span>
-                                                    </div>
-                                                    <Link to={`/admin/home/company-values/${cv._id}`} className={styles.menuItem}>
-                                                        <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>Edit</span>
-                                                    </Link>
-                                                    <div
-                                                        className={styles.menuItem}
-                                                        onClick={() => openDeleteConfirmation(cv._id)}
-                                                    >
-                                                        <FaTrash style={{ color: 'red', marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>Remove</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </td>
+                    {loading && companyValues.length === 0 ? (
+                        <div className="d-flex justify-content-center">
+                            <ThreeDots color="#4a5568" height={80} width={80} />
+                        </div>
+                    ) : (
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>ORDER</th>
+                                    <th>TITLE</th>
+                                    <th>IMAGE</th>
+                                    <th>STATUS</th>
+                                    <th>ACTION</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {companyValues.map(cv => (
+                                    <tr key={cv._id}>
+                                        <td>{cv.displayOrder}</td>
+                                        <td>{cv.companyTitle}</td>
+                                        <td>
+                                            {cv.image ? (
+                                                <img
+                                                    src={cv.image}
+                                                    alt={cv.companyTitle}
+                                                    style={{ maxWidth: '100px', height: 'auto' }}
+                                                />
+                                            ) : 'No Image'}
+                                        </td>
+                                        <td>{cv.status}</td>
+                                        <td>
+                                            <div className={styles.dropdown}>
+                                                <button className={styles.actionBtn} onClick={() => toggleMenu(cv._id)}>
+                                                    <span className={styles.boldText2}>⋮</span>
+                                                </button>
+                                                {menuOpen === cv._id && (
+                                                    <div className={styles.menu}>
+                                                        <div
+                                                            className={styles.menuItem}
+                                                            onClick={() => handleViewDetails(cv._id)}
+                                                        >
+                                                            <FaEye style={{ marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>View Details</span>
+                                                        </div>
+                                                        <Link to={`/admin/home/company-values/${cv._id}`} className={styles.menuItem}>
+                                                            <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>Edit</span>
+                                                        </Link>
+                                                        <div
+                                                            className={styles.menuItem}
+                                                            onClick={() => openDeleteConfirmation(cv._id)}
+                                                        >
+                                                            <FaTrash style={{ color: 'red', marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>Remove</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
 
                 <ul className={styles.pagination}>
@@ -220,7 +235,6 @@ export default function CompanyValueList() {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
             {deleteConfirmation.open && (
                 <div className={styles.modalOverlay} onClick={closeDeleteConfirmation}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -228,13 +242,14 @@ export default function CompanyValueList() {
                         <p style={{ marginBottom: '20px' }}>Are you sure you want to delete this company value?</p>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                             <button className={styles.cancelButton} onClick={closeDeleteConfirmation}>Cancel</button>
-                            <button className={styles.createButton} onClick={handleDeleteConfirm}>Delete</button>
+                            <button className={styles.createButton} onClick={handleDeleteConfirm} disabled={loading}>
+                                {loading ? <ThreeDots color="#fff" height={20} width={40} /> : 'Delete'}
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Error Modal */}
             {errorModal.open && (
                 <div className={styles.modalOverlay} onClick={closeErrorModal}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
