@@ -1,5 +1,3 @@
-// carrerList.js
-
 import { useState, useEffect, useContext } from 'react';
 import styles from '../../styles/App.module.css';
 import { fetchCareers, deleteCareer, fetchCareerById } from '../../api/company/careerApi';
@@ -8,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { IoCreate } from "react-icons/io5";
 import truncateDescription from "../../components/truncateHelper"
+import { ThreeDots } from 'react-loader-spinner';
 
 export default function CareerList() {
     const { token } = useContext(AuthContext);
@@ -23,6 +22,7 @@ export default function CareerList() {
         careerId: null,
     });
     const [errorModal, setErrorModal] = useState({ open: false, message: '' });
+    const [loading, setLoading] = useState(false);
     const perPage = 10;
     const navigate = useNavigate();
 
@@ -36,6 +36,7 @@ export default function CareerList() {
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
                 const res = await fetchCareers(token, { page, limit: perPage, search: debouncedSearch });
                 setCareers(res.data.data);
@@ -49,6 +50,8 @@ export default function CareerList() {
                 } else {
                     setErrorModal({ open: true, message: error.message || 'Failed to fetch careers.' });
                 }
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
@@ -57,6 +60,7 @@ export default function CareerList() {
     const toggleMenu = (id) => setMenuOpen(menuOpen === id ? null : id);
 
     const handleViewDetails = async (id) => {
+        setLoading(true);
         try {
             const res = await fetchCareerById(id, token);
             setSelectedCareer(res.data.data);
@@ -68,6 +72,8 @@ export default function CareerList() {
             } else {
                 setErrorModal({ open: true, message: error.message || 'Failed to fetch career details.' });
             }
+        } finally {
+            setLoading(false);
         }
         setMenuOpen(null);
     };
@@ -84,6 +90,7 @@ export default function CareerList() {
     };
 
     const handleDeleteConfirm = async () => {
+        setLoading(true);
         try {
             await deleteCareer(deleteConfirmation.careerId, token);
             setCareers(prev => prev.filter(career => career._id !== deleteConfirmation.careerId));
@@ -96,6 +103,8 @@ export default function CareerList() {
             } else {
                 setErrorModal({ open: true, message: err.message || 'Failed to delete career.' });
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -122,66 +131,72 @@ export default function CareerList() {
 
             <div className={styles.pageWrapper}>
                 <div className={styles.content}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>JOB TYPE</th>
-                                <th>EXPERIENCE</th>
-                                <th>IMAGE</th>
-                                <th>DESCRIPTION</th>
-                                <th>STATUS</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {careers.map(career => (
-                                <tr key={career._id}>
-                                    <td>{career.jobTypes}</td>
-                                    <td>{career.totalExp}</td>
-                                    <td>
-                                        {career.image ? (
-                                            <img
-                                                src={career.image}
-                                                alt={career.jobTypes}
-                                                style={{ maxWidth: '100px', height: 'auto' }}
-                                            />
-                                        ) : 'No Image'}
-                                    </td>
-                                    <td className={styles.descriptionCell}>{truncateDescription(career.shortDescription, 100)}</td>
-                                    <td>{career.status}</td>
-                                    <td>
-                                        <div className={styles.dropdown}>
-                                            <button className={styles.actionBtn} onClick={() => toggleMenu(career._id)}>
-                                                <span className={styles.boldText2}>⋮</span>
-                                            </button>
-                                            {menuOpen === career._id && (
-                                                <div className={styles.menu}>
-                                                    <div
-                                                        className={styles.menuItem}
-                                                        onClick={() => handleViewDetails(career._id)}
-                                                    >
-                                                        <FaEye style={{ marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>View Details</span>
-                                                    </div>
-                                                    <Link to={`/admin/company/career/${career._id}`} className={styles.menuItem}>
-                                                        <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>Edit</span>
-                                                    </Link>
-                                                    <div
-                                                        className={styles.menuItem}
-                                                        onClick={() => openDeleteConfirmation(career._id)}
-                                                    >
-                                                        <FaTrash style={{ color: 'red', marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>Remove</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </td>
+                    {loading && careers.length === 0 ? (
+                        <div className="d-flex justify-content-center">
+                            <ThreeDots color="#4a5568" height={80} width={80} />
+                        </div>
+                    ) : (
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>JOB TYPE</th>
+                                    <th>EXPERIENCE</th>
+                                    <th>IMAGE</th>
+                                    <th>DESCRIPTION</th>
+                                    <th>STATUS</th>
+                                    <th>ACTION</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {careers.map(career => (
+                                    <tr key={career._id}>
+                                        <td>{career.jobTypes}</td>
+                                        <td>{career.totalExp}</td>
+                                        <td>
+                                            {career.image ? (
+                                                <img
+                                                    src={career.image}
+                                                    alt={career.jobTypes}
+                                                    style={{ maxWidth: '100px', height: 'auto' }}
+                                                />
+                                            ) : 'No Image'}
+                                        </td>
+                                        <td className={styles.descriptionCell}>{truncateDescription(career.shortDescription, 100)}</td>
+                                        <td>{career.status}</td>
+                                        <td>
+                                            <div className={styles.dropdown}>
+                                                <button className={styles.actionBtn} onClick={() => toggleMenu(career._id)}>
+                                                    <span className={styles.boldText2}>⋮</span>
+                                                </button>
+                                                {menuOpen === career._id && (
+                                                    <div className={styles.menu}>
+                                                        <div
+                                                            className={styles.menuItem}
+                                                            onClick={() => handleViewDetails(career._id)}
+                                                        >
+                                                            <FaEye style={{ marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>View Details</span>
+                                                        </div>
+                                                        <Link to={`/admin/company/career/${career._id}`} className={styles.menuItem}>
+                                                            <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>Edit</span>
+                                                        </Link>
+                                                        <div
+                                                            className={styles.menuItem}
+                                                            onClick={() => openDeleteConfirmation(career._id)}
+                                                        >
+                                                            <FaTrash style={{ color: 'red', marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>Remove</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
 
                 <ul className={styles.pagination}>
@@ -220,7 +235,6 @@ export default function CareerList() {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
             {deleteConfirmation.open && (
                 <div className={styles.modalOverlay} onClick={closeDeleteConfirmation}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -228,13 +242,14 @@ export default function CareerList() {
                         <p style={{ marginBottom: '20px' }}>Are you sure you want to delete this career opportunity?</p>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                             <button className={styles.cancelButton} onClick={closeDeleteConfirmation}>Cancel</button>
-                            <button className={styles.createButton} onClick={handleDeleteConfirm}>Delete</button>
+                            <button className={styles.createButton} onClick={handleDeleteConfirm} disabled={loading}>
+                                {loading ? <ThreeDots color="#fff" height={20} width={40} /> : 'Delete'}
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Error Modal */}
             {errorModal.open && (
                 <div className={styles.modalOverlay} onClick={closeErrorModal}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>

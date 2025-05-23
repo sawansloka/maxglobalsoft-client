@@ -1,5 +1,3 @@
-// ClientSpeakList.js
-
 import { useState, useEffect, useContext } from 'react';
 import styles from '../../styles/App.module.css';
 import { fetchClientSpeaks, deleteClientSpeak, fetchClientSpeakById } from '../../api/company/clientSpeakApi';
@@ -7,6 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { IoCreate } from "react-icons/io5";
+import { ThreeDots } from 'react-loader-spinner';
 
 const truncateDescription = (description, maxLength) => {
     if (!description) return '';
@@ -30,6 +29,7 @@ export default function ClientSpeakList() {
         clientSpeakId: null,
     });
     const [errorModal, setErrorModal] = useState({ open: false, message: '' });
+    const [loading, setLoading] = useState(false);
     const perPage = 10;
     const navigate = useNavigate();
 
@@ -43,6 +43,7 @@ export default function ClientSpeakList() {
 
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
                 const res = await fetchClientSpeaks(token, { page, limit: perPage, search: debouncedSearch });
                 setClientSpeaks(res.data.data);
@@ -56,6 +57,8 @@ export default function ClientSpeakList() {
                 } else {
                     setErrorModal({ open: true, message: error.message || 'Failed to fetch client speaks.' });
                 }
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
@@ -64,6 +67,7 @@ export default function ClientSpeakList() {
     const toggleMenu = (id) => setMenuOpen(menuOpen === id ? null : id);
 
     const handleViewDetails = async (id) => {
+        setLoading(true);
         try {
             const res = await fetchClientSpeakById(id, token);
             setSelectedClientSpeak(res.data.data);
@@ -75,6 +79,8 @@ export default function ClientSpeakList() {
             } else {
                 setErrorModal({ open: true, message: error.message || 'Failed to fetch client speak details.' });
             }
+        } finally {
+            setLoading(false);
         }
         setMenuOpen(null);
     };
@@ -91,6 +97,7 @@ export default function ClientSpeakList() {
     };
 
     const handleDeleteConfirm = async () => {
+        setLoading(true);
         try {
             await deleteClientSpeak(deleteConfirmation.clientSpeakId, token);
             setClientSpeaks(prev => prev.filter(cs => cs._id !== deleteConfirmation.clientSpeakId));
@@ -103,6 +110,8 @@ export default function ClientSpeakList() {
             } else {
                 setErrorModal({ open: true, message: err.message || 'Failed to delete client speak.' });
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -120,7 +129,7 @@ export default function ClientSpeakList() {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                 />
-                <Link to="/admin/company/clientspeak/new">
+                <Link to="/admin/company/client-speak/new">
                     <button className={styles.newButton}>
                         <span className={styles.boldText3}><IoCreate /> New Client Speak</span>
                     </button>
@@ -129,66 +138,72 @@ export default function ClientSpeakList() {
 
             <div className={styles.pageWrapper}>
                 <div className={styles.content}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>TITLE</th>
-                                <th>NAME</th>
-                                <th>IMAGE</th>
-                                <th>DESCRIPTION</th>
-                                <th>STATUS</th>
-                                <th>ACTION</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {clientSpeaks.map(cs => (
-                                <tr key={cs._id}>
-                                    <td>{cs.title}</td>
-                                    <td>{cs.name}</td>
-                                    <td>
-                                        {cs.image ? (
-                                            <img
-                                                src={cs.image}
-                                                alt={cs.title}
-                                                style={{ maxWidth: '100px', height: 'auto' }}
-                                            />
-                                        ) : 'No Image'}
-                                    </td>
-                                    <td className={styles.descriptionCell}>{truncateDescription(cs.shortDescription, 100)}</td>
-                                    <td>{cs.status}</td>
-                                    <td>
-                                        <div className={styles.dropdown}>
-                                            <button className={styles.actionBtn} onClick={() => toggleMenu(cs._id)}>
-                                                <span className={styles.boldText2}>⋮</span>
-                                            </button>
-                                            {menuOpen === cs._id && (
-                                                <div className={styles.menu}>
-                                                    <div
-                                                        className={styles.menuItem}
-                                                        onClick={() => handleViewDetails(cs._id)}
-                                                    >
-                                                        <FaEye style={{ marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>View Details</span>
-                                                    </div>
-                                                    <Link to={`/admin/company/clientspeak/${cs._id}`} className={styles.menuItem}>
-                                                        <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>Edit</span>
-                                                    </Link>
-                                                    <div
-                                                        className={styles.menuItem}
-                                                        onClick={() => openDeleteConfirmation(cs._id)}
-                                                    >
-                                                        <FaTrash style={{ color: 'red', marginRight: '8px' }} />
-                                                        <span className={styles.boldText}>Remove</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </td>
+                    {loading && clientSpeaks.length === 0 ? (
+                        <div className="d-flex justify-content-center">
+                            <ThreeDots color="#4a5568" height={80} width={80} />
+                        </div>
+                    ) : (
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>TITLE</th>
+                                    <th>NAME</th>
+                                    <th>IMAGE</th>
+                                    <th>DESCRIPTION</th>
+                                    <th>STATUS</th>
+                                    <th>ACTION</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {clientSpeaks.map(cs => (
+                                    <tr key={cs._id}>
+                                        <td>{cs.title}</td>
+                                        <td>{cs.name}</td>
+                                        <td>
+                                            {cs.image ? (
+                                                <img
+                                                    src={cs.image}
+                                                    alt={cs.title}
+                                                    style={{ maxWidth: '100px', height: 'auto' }}
+                                                />
+                                            ) : 'No Image'}
+                                        </td>
+                                        <td className={styles.descriptionCell}>{truncateDescription(cs.shortDescription, 100)}</td>
+                                        <td>{cs.status}</td>
+                                        <td>
+                                            <div className={styles.dropdown}>
+                                                <button className={styles.actionBtn} onClick={() => toggleMenu(cs._id)}>
+                                                    <span className={styles.boldText2}>⋮</span>
+                                                </button>
+                                                {menuOpen === cs._id && (
+                                                    <div className={styles.menu}>
+                                                        <div
+                                                            className={styles.menuItem}
+                                                            onClick={() => handleViewDetails(cs._id)}
+                                                        >
+                                                            <FaEye style={{ marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>View Details</span>
+                                                        </div>
+                                                        <Link to={`/admin/company/client-speak/${cs._id}`} className={styles.menuItem}>
+                                                            <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>Edit</span>
+                                                        </Link>
+                                                        <div
+                                                            className={styles.menuItem}
+                                                            onClick={() => openDeleteConfirmation(cs._id)}
+                                                        >
+                                                            <FaTrash style={{ color: 'red', marginRight: '8px' }} />
+                                                            <span className={styles.boldText}>Remove</span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
 
                 <ul className={styles.pagination}>
@@ -230,7 +245,6 @@ export default function ClientSpeakList() {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
             {deleteConfirmation.open && (
                 <div className={styles.modalOverlay} onClick={closeDeleteConfirmation}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -238,13 +252,14 @@ export default function ClientSpeakList() {
                         <p style={{ marginBottom: '20px' }}>Are you sure you want to delete this client speak?</p>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                             <button className={styles.cancelButton} onClick={closeDeleteConfirmation}>Cancel</button>
-                            <button className={styles.createButton} onClick={handleDeleteConfirm}>Delete</button>
+                            <button className={styles.createButton} onClick={handleDeleteConfirm} disabled={loading}>
+                                {loading ? <ThreeDots color="#fff" height={20} width={40} /> : 'Delete'}
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Error Modal */}
             {errorModal.open && (
                 <div className={styles.modalOverlay} onClick={closeErrorModal}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>

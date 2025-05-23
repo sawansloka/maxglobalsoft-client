@@ -25,7 +25,7 @@ export default function ProjectCategoryList() {
         categoryId: null,
     });
     const [errorModal, setErrorModal] = useState({ open: false, message: '' });
-    const [loading, setLoading] = useState(false); // Add loading state
+    const [loading, setLoading] = useState(false);
     const perPage = 10;
     const navigate = useNavigate();
 
@@ -38,23 +38,22 @@ export default function ProjectCategoryList() {
     }, [search]);
 
     useEffect(() => {
-        setLoading(true); // Set loading to true at the start of the fetch
+        setLoading(true);
         const fetchData = async () => {
             try {
                 const res = await fetchProjectCategories(token, { page, limit: perPage, search: debouncedSearch });
-                setCategories(res.data.data || []); // Ensure it's an array
+                setCategories(res.data.data || []);
                 setTotalPages(Math.ceil(res.data.total / perPage) || 1);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (error) {
                 console.error('Failed to fetch project categories:', error);
                 if (error.response && error.response.status === 401) {
-                    console.log("Unauthorized access. Redirecting to login.");
                     navigate('/admin/login');
                 } else {
                     setErrorModal({ open: true, message: error.message || 'Failed to fetch project categories.' });
                 }
             } finally {
-                setLoading(false); // Set loading to false after fetch (success or error)
+                setLoading(false);
             }
         };
         fetchData();
@@ -63,17 +62,19 @@ export default function ProjectCategoryList() {
     const toggleMenu = (id) => setMenuOpen(menuOpen === id ? null : id);
 
     const handleViewDetails = async (id) => {
+        setLoading(true);
         try {
             const res = await fetchProjectCategoryById(id, token);
             setSelectedCategory(res.data.data);
         } catch (error) {
             console.error("Failed to fetch project category details:", error);
             if (error.response && error.response.status === 401) {
-                console.log("Unauthorized access. Redirecting to login.");
                 navigate('/admin/login');
             } else {
                 setErrorModal({ open: true, message: error.message || 'Failed to fetch project category details.' });
             }
+        } finally {
+            setLoading(false);
         }
         setMenuOpen(null);
     };
@@ -90,7 +91,7 @@ export default function ProjectCategoryList() {
     };
 
     const handleDeleteConfirm = async () => {
-        setLoading(true); // Set loading to true during deletion
+        setLoading(true);
         try {
             await deleteProjectCategory(deleteConfirmation.categoryId, token);
             setCategories(prev => prev.filter(category => category._id !== deleteConfirmation.categoryId));
@@ -98,13 +99,12 @@ export default function ProjectCategoryList() {
         } catch (err) {
             console.error("Failed to delete project category:", err);
             if (err.response && err.response.status === 401) {
-                console.log("Unauthorized access. Redirecting to login.");
                 navigate('/admin/login');
             } else {
                 setErrorModal({ open: true, message: err.message || 'Failed to delete project category.' });
             }
         } finally {
-            setLoading(false); // Set loading to false after deletion attempt
+            setLoading(false);
         }
     };
 
@@ -131,7 +131,7 @@ export default function ProjectCategoryList() {
 
             <div className={styles.pageWrapper}>
                 <div className={styles.content}>
-                    {loading ? (
+                    {loading && categories.length === 0 ? (
                         <div className="d-flex justify-content-center">
                             <ThreeDots color="#4a5568" height={80} width={80} />
                         </div>
@@ -220,7 +220,7 @@ export default function ProjectCategoryList() {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
+
             {deleteConfirmation.open && (
                 <div className={styles.modalOverlay} onClick={closeDeleteConfirmation}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
@@ -236,7 +236,6 @@ export default function ProjectCategoryList() {
                 </div>
             )}
 
-            {/* Error Modal */}
             {errorModal.open && (
                 <div className={styles.modalOverlay} onClick={closeErrorModal}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>

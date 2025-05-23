@@ -14,7 +14,7 @@ import truncateDescription from "../../components/truncateHelper";
 
 export default function SocialNetworkList() {
     const { token } = useContext(AuthContext);
-    const [socialNetworkData, setSocialNetworkData] = useState([]); // Initialize as an empty array
+    const [socialNetworkData, setSocialNetworkData] = useState([]);
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [deleteConfirmation, setDeleteConfirmation] = useState({
@@ -39,11 +39,10 @@ export default function SocialNetworkList() {
         (async () => {
             try {
                 const res = await fetchSocialNetwork(token, { search: debouncedSearch });
-                setSocialNetworkData(res.data.data || []); // Ensure it's always an array
+                setSocialNetworkData(res.data.data || []);
             } catch (error) {
                 console.error('Failed to fetch social network data:', error);
                 if (error.response && error.response.status === 401) {
-                    console.log("Unauthorized access. Redirecting to login.");
                     navigate('/admin/login');
                 } else {
                     setErrorModal({
@@ -62,17 +61,19 @@ export default function SocialNetworkList() {
     const toggleMenu = (id) => setMenuOpen(menuOpen === id ? null : id);
 
     const handleViewDetails = async (id) => {
+        setLoading(true);
         try {
             const res = await fetchSocialNetworkById(id, token);
             setSelectedSocialNetwork(res.data.data);
         } catch (error) {
             console.error("Failed to fetch social network details:", error);
             if (error.response && error.response.status === 401) {
-                console.log("Unauthorized access. Redirecting to login.");
                 navigate('/admin/login');
             } else {
                 setErrorModal({ open: true, message: error.message || 'Failed to fetch social network details.' });
             }
+        } finally {
+            setLoading(false);
         }
         setMenuOpen(null);
     };
@@ -93,13 +94,11 @@ export default function SocialNetworkList() {
         setLoading(true);
         try {
             await deleteSocialNetwork(deleteConfirmation.id, token);
-            // After successful deletion, refresh the data
             const res = await fetchSocialNetwork(token, { search: debouncedSearch });
             setSocialNetworkData(res.data.data || []);
         } catch (err) {
             console.error('Failed to delete social network data:', err);
             if (err.response && err.response.status === 401) {
-                console.log("Unauthorized access. Redirecting to login.");
                 navigate('/admin/login');
             } else {
                 setErrorModal({
@@ -129,7 +128,7 @@ export default function SocialNetworkList() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
-                <Link to="/admin/company/followus/new">
+                <Link to="/admin/company/follow-us/new">
                     <button className={styles.newButton}>
                         <span className={styles.boldText3}>
                             <IoCreate /> New Follow Us
@@ -140,11 +139,11 @@ export default function SocialNetworkList() {
 
             <div className={styles.pageWrapper}>
                 <div className={styles.content}>
-                    {loading ? (
+                    {loading && socialNetworkData.length === 0 ? (
                         <div className="d-flex justify-content-center">
                             <ThreeDots color="#4a5568" height={80} width={80} />
                         </div>
-                    ) : socialNetworkData && socialNetworkData.length > 0 ? ( // Check if data exists and has length
+                    ) : socialNetworkData && socialNetworkData.length > 0 ? (
                         <table className={styles.table}>
                             <thead>
                                 <tr>
@@ -155,7 +154,7 @@ export default function SocialNetworkList() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {socialNetworkData.map((item, index) => ( // Iterate over the array
+                                {socialNetworkData.map((item, index) => (
                                     <tr key={item._id}>
                                         <td>{index + 1}</td>
                                         <td className={styles.descriptionCell}>{truncateDescription(item.shortDescription, 100)}</td>
@@ -175,7 +174,7 @@ export default function SocialNetworkList() {
                                                             <span className={styles.boldText}>View Details</span>
                                                         </div>
                                                         <Link
-                                                            to={`/admin/company/followus/${item._id}`}
+                                                            to={`/admin/company/follow-us/${item._id}`}
                                                             className={styles.menuItem}
                                                         >
                                                             <FaPencilAlt style={{ color: 'blue', marginRight: '8px' }} />
@@ -233,8 +232,8 @@ export default function SocialNetworkList() {
                             >
                                 Cancel
                             </button>
-                            <button className={styles.createButton} onClick={handleDeleteConfirm}>
-                                Delete
+                            <button className={styles.createButton} onClick={handleDeleteConfirm} disabled={loading}>
+                                {loading ? <ThreeDots color="#fff" height={20} width={40} /> : 'Delete'}
                             </button>
                         </div>
                     </div>

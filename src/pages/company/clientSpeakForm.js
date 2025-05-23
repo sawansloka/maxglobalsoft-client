@@ -61,7 +61,7 @@ export default function ClientSpeakForm() {
             } else {
                 await createClientSpeak(form, token);
             }
-            nav('/admin/company/clientspeak');
+            nav('/admin/company/client-speak');
         } catch (error) {
             console.error("Error submitting client speak:", error);
             if (error.response && error.response.status === 400) {
@@ -75,7 +75,7 @@ export default function ClientSpeakForm() {
     };
 
     const handleCancel = () => {
-        nav('/admin/company/clientspeak');
+        nav('/admin/company/client-speak');
     };
 
     const closeErrorModal = () => {
