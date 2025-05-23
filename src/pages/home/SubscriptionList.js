@@ -1,7 +1,7 @@
 // SubscriptionList.js
 
 import { useState, useEffect, useContext } from 'react';
-import styles from '../../styles/home/BannerList.module.css'; // Reusing styles
+import styles from '../../styles/App.module.css'; // Reusing styles
 import {
     fetchSubscriptions,
     deleteSubscription,

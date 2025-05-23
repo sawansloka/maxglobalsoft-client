@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import styles from '../../styles/home/BannerList.module.css';
+import styles from '../../styles/App.module.css';
 import { fetchPages, deletePage, fetchPageById } from '../../api/page/pageApi';
 import { AuthContext } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
